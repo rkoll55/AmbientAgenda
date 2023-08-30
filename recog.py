@@ -15,9 +15,9 @@ pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tessera
 def main():
 
     # init recog
-    recognize_text(upscale('images/bigwords.png'))
+    #recognize_text(upscale('images/bigwords.png'))
     #recognize_text(cv2.imread('images/bigwords.png'))
-    #box_recog('images/bigwords.png') # recognise the day boxes 
+    box_recog('images/blackbox.png') # recognise the day boxes 
     return
 
 def upscale(path):
@@ -36,7 +36,7 @@ def upscale(path):
     img_LR = img_LR.to(device)
 
     with torch.no_grad():
-        
+
         output = model(img_LR).data.squeeze().float().cpu().clamp_(0, 1).numpy()
     output = np.transpose(output[[2, 1, 0], :, :], (1, 2, 0))
     output = (output * 255.0).round() 
@@ -51,7 +51,8 @@ def upscale(path):
 
 def recognize_text(image):
     # Grayscale, Gaussian blur, Otsu's threshold - fun little preprocessing techniques ( ͡° ͜ʖ ͡°)
-    image = cv2.imread(image)
+    if (type(image) == str):
+        image = cv2.imread(image)
     print(image)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     #blur = cv2.GaussianBlur(gray, (3,3), 0) this completely fucks it on small images
@@ -79,6 +80,7 @@ def recognize_text(image):
 def box_recog(path):
     # Read the input image
     
+    image = cv2.imread(path)
     # Convert the image to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
@@ -130,7 +132,7 @@ def box_recog(path):
     # Display the image with detected squares
     print(f"BOXLEN {len(boxes)}")
     [recognize_text(img[0]) for img in boxes] 
-    #cv2.imshow('Detected Squares', image)
+    cv2.imshow('Detected Squares', image)
     cv2.waitKey(0)
 
     # sorting algorithm???
