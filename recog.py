@@ -3,7 +3,7 @@ import pytesseract  # install with pip install pytesseract // https://pypi.org/p
 from PIL import Image
 import numpy as np
 import torch
-import ESRGAN.RRDBNet_arch as arch
+import ESRGAN2.RRDBNet_arch as arch
 
 # -------------------- BASIC COMPUTER VISION SCRIPT --------------------------------- 
 
