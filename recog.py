@@ -10,7 +10,7 @@ import ESRGAN2.RRDBNet_arch as arch
 # could feed the individual boxes into here?
 
 #This is necessary on win10+ installations as tesseract needs to locate the executable
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe" 
+#pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe" 
 
 def main():
 
