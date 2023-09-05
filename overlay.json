@@ -1,24 +1,42 @@
 {
-    "Monday" : [
-        "Dinner with Susan at 4"
-    ],
-    "Tuesday" : [
-        "Soccor game at 8"
-    ],
-    "Wednesday" : [
+    "Monday" : { 
+       "user1": [
+            "Dinner with Susan at 4"
+        ] 
+    },
 
-    ],
-    "Thursday" : [
+    "Tuesday" : {
+        "user1": [
+            "Soccor game at 8"
+        ],
+        "user2": [
+            "Hair appointment at 10",
+            "Work from 2"   
+        ]
+         
+    },
+    
+    "Wednesday" : {
 
-    ],
-    "Friday" : [
+         
+    },
 
-    ],
-    "Saturday" : [
+    "Thursday" : {
+         
+    },
 
-    ],
-    "Sunday" : [
+    "Friday" : {
+     
+         
+    },
 
-    ]
+    "Saturday" : {
+      
+         
+    },
+
+    "Sunday" : {
+         
+    }
 
 }
