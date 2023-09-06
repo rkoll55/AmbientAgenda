@@ -4,6 +4,12 @@ import time
 import json
 import textwrap
 
+
+import asyncio
+import aiohttp
+import threading 
+
+
 root = tk.Tk()
 original_image = Image.open("template.png")
 panel = None
@@ -104,8 +110,6 @@ def get_overlay_image():
                         offset+= 50
                         offset += len(wrapped_text.split('\n')) * 25
 
-    
-
     return image_with_text
 
 read_json()
@@ -128,6 +132,20 @@ def update_image(text_to_add):
     label.config(image=photo)
     label.image = photo
 
+def main_thread():
+    global root
+    # Displaying initial state of GUI
+    display_image(get_overlay_image())
+    # Running tkinter main loop
+    root.mainloop()
 
-
-display_image(get_overlay_image())
+def async_loop():
+    while True:
+        print("Async loop is running!")
+        time.sleep(5) 
+        #to be implemented...
+ 
+if __name__ == "__main__":
+    t1 = threading.Thread(target=async_loop)
+    t1.start()
+    main_thread()
