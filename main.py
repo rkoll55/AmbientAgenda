@@ -11,7 +11,7 @@ import threading
 
 
 root = tk.Tk()
-original_image = Image.open("template.png")
+original_image = Image.open("images/template.png")
 panel = None
 label = None
 

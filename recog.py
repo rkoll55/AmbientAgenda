@@ -4,20 +4,24 @@ from PIL import Image
 import numpy as np
 import torch
 import ESRGAN2.RRDBNet_arch as arch
-
+import platform
 # -------------------- BASIC COMPUTER VISION SCRIPT --------------------------------- 
 
 # could feed the individual boxes into here?
 
 #This is necessary on win10+ installations as tesseract needs to locate the executable
-#pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe" 
+if platform.system() == "Windows":
+    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe" 
 
 def main():
 
     # init recog
     #recognize_text(upscale('images/bigwords.png'))
     #recognize_text(cv2.imread('images/bigwords.png'))
-    box_recog('images/blackbox.png') # recognise the day boxes 
+    
+    days = box_recog('images/marked_template.png') # recognise the day boxes 
+    for day in days.keys():
+        print(f"{day}: {days[day]}")
     return
 
 def upscale(path):
@@ -49,11 +53,10 @@ def upscale(path):
 
 # ----
 
-def recognize_text(image):
+def recognize_text(image, debug=False):
     # Grayscale, Gaussian blur, Otsu's threshold - fun little preprocessing techniques ( ͡° ͜ʖ ͡°)
     if (type(image) == str):
         image = cv2.imread(image)
-    print(image)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     #blur = cv2.GaussianBlur(gray, (3,3), 0) this completely fucks it on small images
     thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
@@ -65,19 +68,19 @@ def recognize_text(image):
 
     # extract text
     data = pytesseract.image_to_string(thresh, lang='eng', config='--psm 6')
-    print(pytesseract.image_to_data(thresh))
-    print("Recognized text:", data)
     
-    #cv2.imshow('thresh', thresh) # so we can see what tesseract sees
-    #cv2.imshow('opening', opening)
-    #cv2.imshow('invert', invert)
+    if debug:
+        print(pytesseract.image_to_data(thresh))
+        cv2.imshow('thresh', thresh) # so we can see what tesseract sees
+        cv2.imshow('opening', opening)
+        cv2.imshow('invert', invert)
 
-    return
+    return data
 
 
 
 
-def box_recog(path):
+def box_recog(path, debug=False):
     # Read the input image
     
     image = cv2.imread(path)
@@ -125,21 +128,34 @@ def box_recog(path):
             if w > 50 and h > 50:
                 print(f"Found a convex box with\nx: {x}\ny: {y}\nw: {w}\nh: {h}\n")
                 cropped_image = image[y+10:y+h-10, x+10:x+w-10]
-                cv2.imshow(str(i), cropped_image)
+                #cv2.imshow(str(i), cropped_image)
                 cv2.drawContours(image, [hull_draw], 0, colors[i%3], 5)
                 i += 1
                 boxes.append((cropped_image, (x, y, w, h)))
     # Display the image with detected squares
     print(f"BOXLEN {len(boxes)}")
-    [recognize_text(img[0]) for img in boxes] 
-    cv2.imshow('Detected Squares', image)
-    cv2.waitKey(0)
 
-    # sorting algorithm???
+    # Sorting our boxes 
     
+    def sort_boxes(box):
+        if box[1][2] > box[1][3]: # Sat or Sun
+            return 10000 + box[1][0] # skew sort by pushing them back
+        else: 
+            return box[1][0]
+
+    boxes = sorted(boxes, key=sort_boxes)
     
+    days = {'Monday': '', 'Tuesday': '', 'Wednesday': '', 'Thursday': '', 'Friday':'', 'Saturday':'', 'Sunday':''}
+    text = [recognize_text(img[0]) for img in boxes] 
+    for i in range(len(text)):
+        days[list(days.keys())[i]] = text[i]
     
-    cv2.destroyAllWindows()
+
+    if debug:
+        cv2.imshow('Detected Squares', image)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+    return days
 
 if __name__ == "__main__":
     main()
