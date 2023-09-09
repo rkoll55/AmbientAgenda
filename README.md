@@ -16,7 +16,7 @@ This build requires ESRGAN2 for machine learning. Follow [these] (https://huggin
 git clone https://github.com/rkoll55/Byte-Me
 ```
 
-For installing relevant package dependencies, after cloning the repo use the command:
+For installing the relevant package dependencies, after cloning the repo use the command:
 
 ```bash
 pip install -r requirements.txt

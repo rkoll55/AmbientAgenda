@@ -9,8 +9,8 @@ PIL
 numpy
 opencv-python
 Pillow
-torch>=1.7
-torchvision>=0.8.0
+torch
+torchvision
 tqdm
 huggingface-hub
 pytesseract
