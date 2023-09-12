@@ -5,8 +5,10 @@ import numpy as np
 import torch
 import ESRGAN2.RRDBNet_arch as arch
 import platform
+import json
 # -------------------- BASIC COMPUTER VISION SCRIPT --------------------------------- 
 
+username = "ser bron"
 # could feed the individual boxes into here?
 
 #This is necessary on win10+ installations as tesseract needs to locate the executable
@@ -22,6 +24,27 @@ def main():
     days = box_recog('images/marked_template.png') # recognise the day boxes 
     for day in days.keys():
         print(f"{day}: {days[day]}")
+    write_to_temp(days)
+    return
+
+def write_to_temp(days, path="output.json"): 
+
+    # load template    
+    with open(path, "r") as json_template:
+        json_template = json.load(json_template)
+    
+    for day in json_template.keys():
+        if days[day] != "":
+            if username in json_template[day].keys():
+                # recognize what text is ours and what isnt -- MAYBE WE CAN FILTER COLOUR IN THE RECOG???
+                
+                json_template[day][username] += days[day]
+            else:
+                json_template[day][username] = days[day]
+        
+
+    with open("output.json", 'w') as outfile:
+        outfile.write(json.dumps(json_template, indent=4))
     return
 
 def upscale(path):

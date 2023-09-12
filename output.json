@@ -1,0 +1,30 @@
+{
+    "Monday": {
+        "ser bron": "Monday\nMonday\n",
+        "ser bronn 2": "Monday\n"
+    },
+    "Tuesday": {
+        "ser bron": "Tuesday\nTuesday\n",
+        "ser bronn 2": "Tuesday\n"
+    },
+    "Wednesday": {
+        "ser bron": "Wednesday\nWednesday\n",
+        "ser bronn 2": "Wednesday\n"
+    },
+    "Thursday": {
+        "ser bron": "Thursday\nThursday\n",
+        "ser bronn 2": "Thursday\n"
+    },
+    "Friday": {
+        "ser bron": "Friday\nFriday\n",
+        "ser bronn 2": "Friday\n"
+    },
+    "Saturday": {
+        "ser bron": "Sattyday\nSattyday\n",
+        "ser bronn 2": "Sattyday\n"
+    },
+    "Sunday": {
+        "ser bron": "Sundy\nSundy\n",
+        "ser bronn 2": "Sundy\n"
+    }
+}
