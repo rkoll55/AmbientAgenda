@@ -19,7 +19,6 @@ def read_json():
 
     with open("overlay.json", "r") as json_file:
         json_data = json.load(json_file)
-        
     return json_data
 
 

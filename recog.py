@@ -15,6 +15,7 @@ username = "ser bron"
 if platform.system() == "Windows":
     pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe" 
 
+
 def main():
 
     # init recog
