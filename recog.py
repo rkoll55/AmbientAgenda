@@ -28,10 +28,10 @@ def main():
     write_to_temp(days)
     return
 
-def write_to_temp(days, path="output.json"): 
+def write_to_temp(days, infile="template.json", outfile="output.json"): 
 
     # load template    
-    with open(path, "r") as json_template:
+    with open(infile, "r") as json_template:
         json_template = json.load(json_template)
     
     for day in json_template.keys():
@@ -44,9 +44,9 @@ def write_to_temp(days, path="output.json"):
                 json_template[day][username] = days[day]
         
 
-    with open("output.json", 'w') as outfile:
+    with open(outfile, 'w') as outfile:
         outfile.write(json.dumps(json_template, indent=4))
-    return
+    return json.dumps(json_template, indent=4)
 
 def upscale(path):
     #model setup
