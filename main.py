@@ -10,7 +10,6 @@ import aiohttp
 import threading 
 
 
-root = tk.Tk()
 original_image = Image.open("images/template.png")
 panel = None
 label = None
@@ -114,10 +113,9 @@ def get_overlay_image():
 read_json()
 
 def display_image(image_with_text):
-    global root
     global label
 
-    root.destroy(); root = tk.Tk()
+    root = tk.Tk()
     photo = ImageTk.PhotoImage(image_with_text)
     label = tk.Label(root, image=photo)
     label.pack()
@@ -132,11 +130,10 @@ def update_image(text_to_add):
     label.image = photo
 
 def main_thread():
-    global root
-    # Displaying initial state of GUI
-    display_image(get_overlay_image())
-    # Running tkinter main loop
-    root.mainloop()
+    while True:
+        # Displaying initial state of GUI
+        display_image(get_overlay_image())
+        # Running tkinter main loop
 
 def async_loop():
     while True:
