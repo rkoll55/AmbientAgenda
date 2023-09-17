@@ -3,7 +3,7 @@ import RPi as GPIO #Need to install "Microsoft C++ Build Tools first"
 import subprocess
 from picamera import PiCamera
 import time
-import toby_ML
+import recog
 
 GPIO.setmode(GPIO.BCM)
 
@@ -40,7 +40,7 @@ try:
         '''
         if button_state == GPIO.LOW and not button_pressed:
             camera.capture('capture.jpg')
-            json = toby_ML.doMLStuff('capture.jpg')
+            json = recog.write_to_temp(recog.box_recog('capture.jpg'), infile="template.json", outfile="output.json") #has default file paths
             # push to cloud over here
             button_pressed = True
         elif button_state == GPIO.HIGH:
