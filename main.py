@@ -131,38 +131,34 @@ def get_overlay_image():
 
 read_json()
 
-def display_image(image_with_text):
-    global label
-
+#initialises Tkinter window once with the label to display the image, rather than recreating the window every time the image is updated.
+def init_display():
+    global root, label
     root = tk.Tk()
+    image_with_text = get_overlay_image()
     photo = ImageTk.PhotoImage(image_with_text)
+
     label = tk.Label(root, image=photo)
     label.pack()
     label.photo = photo
-    root.mainloop()
-
-def update_image(text_to_add):
-    overlay = get_overlay_image(text_to_add)
-    photo = ImageTk.PhotoImage(overlay)
-
-    label.config(image=photo)
-    label.image = photo
-
-def main_thread():
-    while True:
-
-        # Displaying initial state of GUI
-        
-        display_image(get_overlay_image())
-        # Running tkinter main loop
 
 def async_loop():
     while True:
         print("Async loop is running!")
         time.sleep(5) 
+        update_image()
         #to be implemented...
+
+def update_image():
+    overlay = get_overlay_image()
+    photo = ImageTk.PhotoImage(overlay)
+
+    label.config(image=photo)
+    label.image = photo
  
 if __name__ == "__main__":
+    init_display()
     t1 = threading.Thread(target=async_loop)
     t1.start()
-    main_thread()
+    # main_thread()
+    root.mainloop()
