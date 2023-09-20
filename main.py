@@ -6,15 +6,18 @@ import textwrap
 import os
 from playsound import playsound
 import threading 
+import datetime
+import re
+
 
 
 original_image = Image.open("images/template.png")
 panel = None
 label = None
-sounds_made = [False, False, False, False, False]
 
 
 def play_sound(type="base"):
+    print(type)
     playsound("chime.mp3") 
 
 
@@ -25,9 +28,24 @@ def read_json():
     return json_data
 
 def make_sound(event):
-    if sounds_made[0] == False and (event.find("dinner") or event.find("lunch") or event.find("breakfast")):
-        sound_thread = threading.Thread(target=play_sound); sound_thread.start()
-        sounds_made[0] = True
+    event = event.lower()
+    # sounds for food
+    if (event.find("dinner") != -1 or event.find("lunch") != -1 or event.find("breakfast") != -1 or event.find("food") != -1 or event.find("brunch") != -1):
+        play_sound("food")
+    # sounds for sports
+    elif (event.find("sport") != -1 or event.find("game") != -1 or event.find("match") != -1 or event.find("training") != -1 or event.find("gym") != -1):
+        play_sound("sport")
+    # work / school
+    elif (event.find("uni") != -1 or event.find("school") != -1 or event.find("work") != -1 or event.find("meeting") != -1 or event.find("class") != -1 or event.find("lecture") != -1):
+        play_sound("work")
+    # social
+    elif (event.find("friend") != -1 or event.find("hang") != -1 or event.find("meet") != -1 or event.find("meet") != -1 or event.find("date") != -1 or event.find("party") != -1):
+        play_sound("social")
+    # sound for other stuff
+    else:
+        play_sound("base")
+
+
 
 def get_overlay_image():
     sound_played = False
@@ -43,9 +61,8 @@ def get_overlay_image():
                 for user, events in day_data.items():
                     colour = "blue" if user == "user1" else "black"
                     for event in events:
-                        sound_played = make_sound(event) if not sound_played else sound_played
                         wrapped_text = textwrap.fill(event, width=15)
-                        draw.multiline_text((100, offset), wrapped_text, fill=colour, font=font)  
+                        draw.multiline_text((80, offset), wrapped_text, fill=colour, font=font)  
                         offset+= 50
                         offset += len(wrapped_text.split('\n')) * 25
 
@@ -55,9 +72,8 @@ def get_overlay_image():
                 for user, events in day_data.items():
                     colour = "blue" if user == "user1" else "black"
                     for event in events:
-                        sound_played = make_sound(event) if not sound_played else sound_played
                         wrapped_text = textwrap.fill(event, width=15)
-                        draw.multiline_text((450, offset), wrapped_text, fill=colour, font=font)  
+                        draw.multiline_text((430, offset), wrapped_text, fill=colour, font=font)  
                         offset+= 50
                         offset += len(wrapped_text.split('\n')) * 25
         
@@ -67,9 +83,8 @@ def get_overlay_image():
                 for user, events in day_data.items():
                     colour = "blue" if user == "user1" else "black"
                     for event in events:
-                        sound_played = make_sound(event) if not sound_played else sound_played
                         wrapped_text = textwrap.fill(event, width=15)
-                        draw.multiline_text((810, offset), wrapped_text, fill=colour, font=font)  
+                        draw.multiline_text((790, offset), wrapped_text, fill=colour, font=font)  
                         offset+= 50
                         offset += len(wrapped_text.split('\n')) * 25
         
@@ -79,9 +94,8 @@ def get_overlay_image():
                 for user, events in day_data.items():
                     colour = "blue" if user == "user1" else "black"
                     for event in events:
-                        sound_played = make_sound(event) if not sound_played else sound_played
                         wrapped_text = textwrap.fill(event, width=15)
-                        draw.multiline_text((1175, offset), wrapped_text, fill=colour, font=font)  
+                        draw.multiline_text((1155, offset), wrapped_text, fill=colour, font=font)  
                         offset+= 50
                         offset += len(wrapped_text.split('\n')) * 25
 
@@ -92,10 +106,8 @@ def get_overlay_image():
                 for user, events in day_data.items():
                     colour = "blue" if user == "user1" else "black"
                     for event in events:
-                        sound_played = make_sound(event) if not sound_played else sound_played
-
                         wrapped_text = textwrap.fill(event, width=15)
-                        draw.multiline_text((1530, offset), wrapped_text, fill=colour, font=font)  
+                        draw.multiline_text((1520, offset), wrapped_text, fill=colour, font=font)  
                         offset+= 50
                         offset += len(wrapped_text.split('\n')) * 25
 
@@ -106,8 +118,6 @@ def get_overlay_image():
                 for user, events in day_data.items():
                     colour = "blue" if user == "user1" else "black"
                     for event in events:
-                        sound_played = make_sound(event) if not sound_played else sound_played
-
                         wrapped_text = textwrap.fill(event, width=40)
                         draw.multiline_text((90, offset), wrapped_text, fill=colour, font=font)  
                         offset+= 50
@@ -120,8 +130,6 @@ def get_overlay_image():
                 for user, events in day_data.items():
                     colour = "blue" if user == "user1" else "black"
                     for event in events:
-                        sound_played = make_sound(event) if not sound_played else sound_played
-
                         wrapped_text = textwrap.fill(event, width=40)
                         draw.multiline_text((990, offset), wrapped_text, fill=colour, font=font)  
                         offset+= 50
@@ -141,10 +149,11 @@ def init_display():
     label = tk.Label(root, image=photo)
     label.pack()
     label.photo = photo
+    
 
 def async_loop():
     while True:
-        print("Async loop is running!")
+        #print("Async loop is running!")
         time.sleep(5) 
         update_image()
         #to be implemented...
@@ -155,10 +164,53 @@ def update_image():
 
     label.config(image=photo)
     label.image = photo
+
+def time_thread():
+    played = False
+    numplayed = 0
+    pattern = r'([1-9]|1[0-2])(am|pm)'
+
+    while True:
+        current_datetime = datetime.datetime.now()
+        day_of_week = current_datetime.strftime("%A")
+        current_hour_24 = int(current_datetime.strftime("%H"))
+        
+        current_minute = current_datetime.minute
+
+        if (current_minute < 30):
+            numplayed = 0
+
+        else:
+            json_file = read_json()
+            #rread the JSON for the day and find the relevant events
+            # play the relevant sounds for them and track how many were played
+            # if numplayed > 0 and number events > numlpayed play the difference 
+            day_data =  json_file.get(day_of_week, {})
+            if day_data:
+                counter = 0
+                for user, events in day_data.items():
+                    for event in events:
+                        match = re.search(pattern, event, re.IGNORECASE)
+
+                        cur_time = int(match.group(1))
+                        if (match.group(2).lower() == "pm"):
+                            cur_time += 12
+                        
+                        if (((cur_time - current_hour_24) == 1) and (counter >= numplayed)):
+                            make_sound(event)
+                        
+                        counter = counter + 1
+
+
+        numplayed = counter
+        
+        time.sleep(60)
  
 if __name__ == "__main__":
     init_display()
     t1 = threading.Thread(target=async_loop)
     t1.start()
+    t2 = threading.Thread(target=time_thread)
+    t2.start()
     # main_thread()
     root.mainloop()

@@ -1,22 +1,35 @@
 {
     "Monday" : { 
        "user1": [
-            "Dinner with Susan at 4"
+            "8PM dinner"
         ] 
     },
 
     "Tuesday" : {
         "user1": [
-            "Soccor game at 8"
+            "9AM Soccor Game"
         ],
         "user2": [
-            "Hair appointment at 10"
+            "12PM hangout with friends"
+
         ]
          
     },
     
     "Wednesday" : {
+        "user1": [
+            "11pm Soccor Game"
+         
+        ],
+        "user2": [
+            "12PM hangout with friends breakfast",
+            "12PM sport",
+            "12PM school",
+            "12PM hangout",
+            "12PM zoo"
 
+
+        ]
          
     },
 
