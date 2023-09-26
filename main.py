@@ -188,33 +188,56 @@ def async_loop():
 
 # for google calendar
 def google_calendar_handler():
-    try:
-        service = OAuthHandler()
-        
-        now = datetime.datetime.utcnow().isoformat() + 'Z'
-        one_week_from_now = (datetime.datetime.utcnow() + timedelta(weeks=1)).isoformat() + 'Z'
-        
-        print('Getting all events for the upcoming week')
-        
-        events_result = service.events().list(calendarId='primary', timeMin=now, timeMax=one_week_from_now,
-                                              singleEvents=True, orderBy='startTime').execute()
-        
-        events = events_result.get('items', [])
-        
-        if not events:
-            print('No upcoming events found.')
-            return
+    while True:  # keep this thread always running
+        try:
+            service = OAuthHandler()
+            
+            now = datetime.datetime.utcnow().isoformat() + 'Z'
+            one_week_from_now = (datetime.datetime.utcnow() + timedelta(weeks=1)).isoformat() + 'Z'
+            
+            print('Getting all events for the upcoming week')
+            
+            events_result = service.events().list(calendarId='primary', timeMin=now, timeMax=one_week_from_now,
+                                                  singleEvents=True, orderBy='startTime').execute()
+            
+            events = events_result.get('items', [])
+            
+            if not events:
+                print('No upcoming events found.')
+                continue  # go to next iteration of the loop
+            
+            js = read_json()  # read the existing JSON data
+            
+            for event in events:
+                start = event['start'].get('dateTime', event['start'].get('date'))
+                # Parsing the date string to datetime object
+                date_obj = parser.parse(start)
+                # Get the day of the week
+                day_of_week = date_obj.strftime("%A")
+                
+                #Format time string
+                formatted_time = date_obj.strftime('%I%p').lstrip('0').lower()
 
-        for event in events:
-            start = event['start'].get('dateTime', event['start'].get('date'))
-            # Parsing the date string to datetime object
-            date_obj = parser.parse(start)
-             # Converting datetime object to a user-friendly string like '3pm'
-            formatted_time = date_obj.strftime('%I%p').lstrip('0').lower()
-            print(f"{formatted_time} {event['summary']}")
+                event_summary = f"{formatted_time} {event['summary']}"
+                
+                #Events for user 1
+                user = 'user1'
+                if day_of_week not in js:
+                    js[day_of_week] = {user: [event_summary]}
+                elif user not in js[day_of_week]:
+                    js[day_of_week][user] = [event_summary]
+                else:
+                    js[day_of_week][user].append(event_summary)
 
-    except HttpError as error:
-        print('An error occurred: %s' % error)
+            # Write updated data back to JSON file
+            with open("overlay.json", "w") as json_file:
+                json.dump(js, json_file)
+            
+        except HttpError as error:
+            print('An error occurred: %s' % error)
+        
+        # sleep for 100 seconds before rechecking for events added to google calendar 
+        time.sleep(100)
 
 
 def update_image():
