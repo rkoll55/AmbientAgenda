@@ -10,6 +10,18 @@ import datetime
 import re
 
 
+# added for google calendar 
+import os.path
+import datetime
+from datetime import timedelta
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+
+SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
+
 
 original_image = Image.open("images/template.png")
 panel = None
@@ -19,6 +31,25 @@ label = None
 def play_sound(type="base"):
     print(type)
     playsound("chime.mp3") 
+
+# for initial setup of access tokens for google calendar
+def OAuthHandler():
+    creds = None
+    if os.path.exists('token.json'):
+        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
+            creds = flow.run_local_server(port=0)
+        
+        with open('token.json', 'w') as token:
+            token.write(creds.to_json())
+
+    service = build('calendar', 'v3', credentials=creds)
+    return service
 
 
 def read_json():
@@ -150,13 +181,39 @@ def init_display():
     label.pack()
     label.photo = photo
     
-
 def async_loop():
     while True:
         #print("Async loop is running!")
         time.sleep(5) 
         update_image()
         #to be implemented...
+
+# for google calendar
+def google_calendar_handler():
+    try:
+        service = OAuthHandler()
+        
+        now = datetime.datetime.utcnow().isoformat() + 'Z'
+        one_week_from_now = (datetime.datetime.utcnow() + timedelta(weeks=1)).isoformat() + 'Z'
+        
+        print('Getting all events for the upcoming week')
+        
+        events_result = service.events().list(calendarId='primary', timeMin=now, timeMax=one_week_from_now,
+                                              singleEvents=True, orderBy='startTime').execute()
+        
+        events = events_result.get('items', [])
+        
+        if not events:
+            print('No upcoming events found.')
+            return
+
+        for event in events:
+            start = event['start'].get('dateTime', event['start'].get('date'))
+            print(start, event['summary'])
+
+    except HttpError as error:
+        print('An error occurred: %s' % error)
+
 
 def update_image():
     overlay = get_overlay_image()
@@ -212,5 +269,6 @@ if __name__ == "__main__":
     t1.start()
     t2 = threading.Thread(target=time_thread)
     t2.start()
-    # main_thread()
+    t3 = threading.Thread(target=google_calendar_handler)
+    t3.start()
     root.mainloop()
