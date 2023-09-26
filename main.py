@@ -19,6 +19,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from dateutil import parser
 
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 
@@ -51,7 +52,6 @@ def OAuthHandler():
     service = build('calendar', 'v3', credentials=creds)
     return service
 
-
 def read_json():
 
     with open("overlay.json", "r") as json_file:
@@ -75,8 +75,6 @@ def make_sound(event):
     # sound for other stuff
     else:
         play_sound("base")
-
-
 
 def get_overlay_image():
     sound_played = False
@@ -209,7 +207,11 @@ def google_calendar_handler():
 
         for event in events:
             start = event['start'].get('dateTime', event['start'].get('date'))
-            print(start, event['summary'])
+            # Parsing the date string to datetime object
+            date_obj = parser.parse(start)
+             # Converting datetime object to a user-friendly string like '3pm'
+            formatted_time = date_obj.strftime('%I%p').lstrip('0').lower()
+            print(f"{formatted_time} {event['summary']}")
 
     except HttpError as error:
         print('An error occurred: %s' % error)
