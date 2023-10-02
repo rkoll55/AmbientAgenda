@@ -256,32 +256,29 @@ def time_thread():
         current_datetime = datetime.datetime.now()
         day_of_week = current_datetime.strftime("%A")
         current_hour_24 = int(current_datetime.strftime("%H"))
-        
         current_minute = current_datetime.minute
+        print(current_datetime)
 
-        if (current_minute < 30):
-            numplayed = 0
+        
+        json_file = read_json()
+        #rread the JSON for the day and find the relevant events
+        # play the relevant sounds for them and track how many were played
+        # if numplayed > 0 and number events > numlpayed play the difference 
+        day_data =  json_file.get(day_of_week, {})
+        if day_data:
+            counter = 0
+            for user, events in day_data.items():
+                for event in events:
+                    match = re.search(pattern, event, re.IGNORECASE)
 
-        else:
-            json_file = read_json()
-            #rread the JSON for the day and find the relevant events
-            # play the relevant sounds for them and track how many were played
-            # if numplayed > 0 and number events > numlpayed play the difference 
-            day_data =  json_file.get(day_of_week, {})
-            if day_data:
-                counter = 0
-                for user, events in day_data.items():
-                    for event in events:
-                        match = re.search(pattern, event, re.IGNORECASE)
-
-                        cur_time = int(match.group(1))
-                        if (match.group(2).lower() == "pm"):
-                            cur_time += 12
-                        
-                        if (((cur_time - current_hour_24) == 1) and (counter >= numplayed)):
-                            make_sound(event)
-                        
-                        counter = counter + 1
+                    cur_time = int(match.group(1))
+                    if (match.group(2).lower() == "pm"):
+                        cur_time += 12
+                    
+                    if (((cur_time - current_hour_24) == 1) and (counter >= numplayed)):
+                        make_sound(event)
+                    
+                    counter = counter + 1
 
 
         numplayed = counter
