@@ -8,7 +8,7 @@ import platform
 import json
 # -------------------- BASIC COMPUTER VISION SCRIPT --------------------------------- 
 
-username = "ser bron"
+
 # could feed the individual boxes into here?
 
 #This is necessary on win10+ installations as tesseract needs to locate the executable
@@ -28,7 +28,7 @@ def main():
     write_to_temp(days)
     return
 
-def write_to_temp(days, infile="template.json", outfile="output.json"): 
+def write_to_temp(days, username, infile="template.json", outfile="output.json"): 
 
     # load template    
     with open(infile, "r") as json_template:
