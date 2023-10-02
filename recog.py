@@ -28,7 +28,7 @@ def main():
     write_to_temp(days)
     return
 
-def write_to_temp(days, password, infile="template.json", outfile="output.json"): 
+def write_to_temp(days, username, infile="template.json", outfile="output.json"): 
 
     # load template    
     with open(infile, "r") as json_template:
