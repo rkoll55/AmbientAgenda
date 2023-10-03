@@ -183,8 +183,14 @@ def async_loop():
     while True:
         #print("Async loop is running!")
         time.sleep(5) 
+
+        #if the buttor is pressed
+        # clear_image()
+        #else
         update_image()
-        #to be implemented...
+        
+        
+        
 
 # for google calendar
 def google_calendar_handler():
@@ -242,6 +248,13 @@ def google_calendar_handler():
 
 def update_image():
     overlay = get_overlay_image()
+    photo = ImageTk.PhotoImage(overlay)
+
+    label.config(image=photo)
+    label.image = photo
+
+def clear_image():
+    overlay = original_image.copy()
     photo = ImageTk.PhotoImage(overlay)
 
     label.config(image=photo)
