@@ -1,23 +1,23 @@
 {
     "Monday": {
-        "user1": "Monday\n\f"
+        "user1": "Monday\n"
     },
     "Tuesday": {
-        "user1": "Tuesday\n\f"
+        "user1": "Tuesday\n"
     },
     "Wednesday": {
-        "user1": "Wednesday\n\f"
+        "user1": "Wednesday\n"
     },
     "Thursday": {
-        "user1": "Thursday\n\f"
+        "user1": "Thursday\n"
     },
     "Friday": {
-        "user1": "Friday\n\f"
+        "user1": "Friday\n"
     },
     "Saturday": {
-        "user1": "Sattyday\n\f"
+        "user1": "Sattyday\n"
     },
     "Sunday": {
-        "user1": "Sundy\n\f"
+        "user1": "Sundy\n"
     }
 }

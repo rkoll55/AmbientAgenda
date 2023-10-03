@@ -46,21 +46,27 @@ try:
             displayer_process = None
         '''
         if button_state == GPIO.LOW and not button_pressed:
+            # we need to kill the window before capture
+
             camera.capture('capture.jpg')
             json_object = recog.write_to_temp(recog.box_recog('capture.jpg'), infile="json/template.json", outfile="json/output.json") #has default file paths
             # push to cloud over here
-            print("we running")
+            print("Successfully recognised text")
+            
+            print("Connecting to IoT Hub...")
             client = iothub_client_init()
-            #client.connect()
-
+            client.connect()
+            print("Successfully connected to IoT hub")
 
             #the code to send
             print(json_object)
             print(str(json_object))
             message = Message(str(json_object))
+            print("Sending capture to IoT Hub...")
             message.content_encoding = "utf-8"
             message.content_type = "application/json"
             client.send_message(message)
+            print("Sent.")
             #no idea if it works
 
             button_pressed = True
