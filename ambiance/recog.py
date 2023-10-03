@@ -3,11 +3,16 @@ import pytesseract  # install with pip install pytesseract // https://pypi.org/p
 from PIL import Image
 import numpy as np
 import torch
-import ESRGAN2.RRDBNet_arch as arch
+
+import sys
+sys.path.append('../ESRGAN2')
+from ESRGAN2 import RRDBNet_arch as arch
+
 import platform
 import json
 # -------------------- BASIC COMPUTER VISION SCRIPT --------------------------------- 
 
+username = "user1"
 
 # could feed the individual boxes into here?
 
@@ -25,7 +30,7 @@ def main():
     days = box_recog('images/marked_template.png') # recognise the day boxes 
     for day in days.keys():
         print(f"{day}: {days[day]}")
-    write_to_temp(days)
+    write_to_temp(days, username)
     return
 
 def write_to_temp(days, username, infile="json/template.json", outfile="json/output.json"): 
