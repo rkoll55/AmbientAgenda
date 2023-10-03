@@ -31,22 +31,22 @@ label = None
 
 def play_sound(type="base"):
     print(type)
-    playsound("chime.mp3") 
+    playsound("sounds/chime.mp3") 
 
 # for initial setup of access tokens for google calendar
 def OAuthHandler():
     creds = None
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    if os.path.exists('json/token.json'):
+        creds = Credentials.from_authorized_user_file('json/token.json', SCOPES)
 
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file('json/credentials.json', SCOPES)
             creds = flow.run_local_server(port=0)
         
-        with open('token.json', 'w') as token:
+        with open('json/token.json', 'w') as token:
             token.write(creds.to_json())
 
     service = build('calendar', 'v3', credentials=creds)
@@ -54,7 +54,7 @@ def OAuthHandler():
 
 def read_json():
 
-    with open("overlay.json", "r") as json_file:
+    with open("json/overlay.json", "r") as json_file:
         json_data = json.load(json_file)
     return json_data
 
@@ -230,7 +230,7 @@ def google_calendar_handler():
                     js[day_of_week][user].append(event_summary)
 
             # Write updated data back to JSON file
-            with open("overlay.json", "w") as json_file:
+            with open("json/overlay.json", "w") as json_file:
                 json.dump(js, json_file)
             
         except HttpError as error:

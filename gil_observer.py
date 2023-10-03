@@ -47,7 +47,7 @@ try:
         '''
         if button_state == GPIO.LOW and not button_pressed:
             camera.capture('capture.jpg')
-            json_object = recog.write_to_temp(recog.box_recog('capture.jpg'), infile="template.json", outfile="output.json") #has default file paths
+            json_object = recog.write_to_temp(recog.box_recog('capture.jpg'), infile="json/template.json", outfile="json/output.json") #has default file paths
             # push to cloud over here
             print("we running")
             client = iothub_client_init()
