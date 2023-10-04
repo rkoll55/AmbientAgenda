@@ -53,10 +53,10 @@ def OAuthHandler():
     return service
 
 def read_json():
-
     with open("json/overlay.json", "r") as json_file:
         json_data = json.load(json_file)
     return json_data
+
 
 def make_sound(event):
     event = event.lower()
@@ -75,6 +75,18 @@ def make_sound(event):
     # sound for other stuff
     else:
         play_sound("base")
+
+
+# method to get all the existing events to check duplicate events 
+def get_all_existing_events(js):
+    existing_events = set()
+    # may need js = read_json() here 
+    for day, day_data in js.items():
+        for user, events in day_data.items():
+            for event in events:
+                existing_events.add(event)
+
+    return existing_events
 
 def get_overlay_image():
     sound_played = False
@@ -188,9 +200,6 @@ def async_loop():
         # clear_image()
         #else
         update_image()
-        
-        
-        
 
 # for google calendar
 def google_calendar_handler():
@@ -213,7 +222,8 @@ def google_calendar_handler():
                 continue  # go to next iteration of the loop
             
             js = read_json()  # read the existing JSON data
-            
+            existing_events = get_all_existing_events(js) #ADDED HERE REMOVE IF BROKEN 
+
             for event in events:
                 start = event['start'].get('dateTime', event['start'].get('date'))
                 # Parsing the date string to datetime object
@@ -228,12 +238,15 @@ def google_calendar_handler():
                 
                 #Events for user 1
                 user = 'user1'
-                if day_of_week not in js:
-                    js[day_of_week] = {user: [event_summary]}
-                elif user not in js[day_of_week]:
-                    js[day_of_week][user] = [event_summary]
-                else:
-                    js[day_of_week][user].append(event_summary)
+                if event_summary not in existing_events:
+                    if day_of_week not in js:
+                        js[day_of_week] = {user: [event_summary]}
+                    elif user not in js[day_of_week]:
+                        js[day_of_week][user] = [event_summary]
+                    else:
+                        if event_summary not in js[day_of_week][user]: # check its not a duplicate event 
+                            js[day_of_week][user].append(event_summary)
+                        existing_events.add(event_summary)  # mark this event as added
 
             # Write updated data back to JSON file
             with open("json/overlay.json", "w") as json_file:
