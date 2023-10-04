@@ -222,7 +222,7 @@ def google_calendar_handler():
                 continue  # go to next iteration of the loop
             
             js = read_json()  # read the existing JSON data
-            existing_events = get_all_existing_events(js) #ADDED HERE REMOVE IF BROKEN 
+            existing_events = get_all_existing_events(js)
 
             for event in events:
                 start = event['start'].get('dateTime', event['start'].get('date'))
