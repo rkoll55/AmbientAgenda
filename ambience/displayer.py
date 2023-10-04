@@ -100,7 +100,7 @@ def get_overlay_image():
             offset = 150
             if isinstance(day_data, dict):
                 for user, events in day_data.items():
-                    colour = "blue" if user == "user1" else "black"
+                    colour = "blue" if user == "user1" else "green"
                     for event in events:
                         wrapped_text = textwrap.fill(event, width=15)
                         draw.multiline_text((80, offset), wrapped_text, fill=colour, font=font)  
@@ -111,7 +111,7 @@ def get_overlay_image():
             offset = 150
             if isinstance(day_data, dict):
                 for user, events in day_data.items():
-                    colour = "blue" if user == "user1" else "black"
+                    colour = "blue" if user == "user1" else "green"
                     for event in events:
                         wrapped_text = textwrap.fill(event, width=15)
                         draw.multiline_text((430, offset), wrapped_text, fill=colour, font=font)  
@@ -122,7 +122,7 @@ def get_overlay_image():
             offset = 150
             if isinstance(day_data, dict):
                 for user, events in day_data.items():
-                    colour = "blue" if user == "user1" else "black"
+                    colour = "blue" if user == "user1" else "green"
                     for event in events:
                         wrapped_text = textwrap.fill(event, width=15)
                         draw.multiline_text((790, offset), wrapped_text, fill=colour, font=font)  
@@ -133,7 +133,7 @@ def get_overlay_image():
             offset = 150
             if isinstance(day_data, dict):
                 for user, events in day_data.items():
-                    colour = "blue" if user == "user1" else "black"
+                    colour = "blue" if user == "user1" else "green"
                     for event in events:
                         wrapped_text = textwrap.fill(event, width=15)
                         draw.multiline_text((1155, offset), wrapped_text, fill=colour, font=font)  
@@ -145,7 +145,7 @@ def get_overlay_image():
             offset = 150
             if isinstance(day_data, dict):
                 for user, events in day_data.items():
-                    colour = "blue" if user == "user1" else "black"
+                    colour = "blue" if user == "user1" else "green"
                     for event in events:
                         wrapped_text = textwrap.fill(event, width=15)
                         draw.multiline_text((1520, offset), wrapped_text, fill=colour, font=font)  
@@ -157,7 +157,7 @@ def get_overlay_image():
             offset = 750
             if isinstance(day_data, dict):
                 for user, events in day_data.items():
-                    colour = "blue" if user == "user1" else "black"
+                    colour = "blue" if user == "user1" else "green"
                     for event in events:
                         wrapped_text = textwrap.fill(event, width=40)
                         draw.multiline_text((90, offset), wrapped_text, fill=colour, font=font)  
@@ -169,7 +169,7 @@ def get_overlay_image():
             offset = 750
             if isinstance(day_data, dict):
                 for user, events in day_data.items():
-                    colour = "blue" if user == "user1" else "black"
+                    colour = "blue" if user == "user1" else "green"
                     for event in events:
                         wrapped_text = textwrap.fill(event, width=40)
                         draw.multiline_text((990, offset), wrapped_text, fill=colour, font=font)  
