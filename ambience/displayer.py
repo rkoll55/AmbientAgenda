@@ -92,7 +92,8 @@ def get_overlay_image():
     sound_played = False
     image_with_text = original_image.copy()
     draw = ImageDraw.Draw(image_with_text)
-    font = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeMonoBoldOblique.ttf", 36, encoding="unic")
+    font = ImageFont.truetype("/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf", 36, encoding="unic")
+    # font = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeMonoBoldOblique.ttf", 36, encoding="unic")
     js = read_json()
 
     for day, day_data in js.items():
@@ -103,7 +104,7 @@ def get_overlay_image():
                     colour = "blue" if user == "user1" else "green"
                     for event in events:
                         wrapped_text = textwrap.fill(event, width=15)
-                        draw.multiline_text((80, offset), wrapped_text, fill=colour, font=font)  
+                        draw.multiline_text((100, offset), wrapped_text, fill=colour, font=font)  
                         offset+= 50
                         offset += len(wrapped_text.split('\n')) * 25
 
@@ -114,7 +115,7 @@ def get_overlay_image():
                     colour = "blue" if user == "user1" else "green"
                     for event in events:
                         wrapped_text = textwrap.fill(event, width=15)
-                        draw.multiline_text((430, offset), wrapped_text, fill=colour, font=font)  
+                        draw.multiline_text((450, offset), wrapped_text, fill=colour, font=font)  
                         offset+= 50
                         offset += len(wrapped_text.split('\n')) * 25
         
@@ -125,7 +126,7 @@ def get_overlay_image():
                     colour = "blue" if user == "user1" else "green"
                     for event in events:
                         wrapped_text = textwrap.fill(event, width=15)
-                        draw.multiline_text((790, offset), wrapped_text, fill=colour, font=font)  
+                        draw.multiline_text((810, offset), wrapped_text, fill=colour, font=font)  
                         offset+= 50
                         offset += len(wrapped_text.split('\n')) * 25
         
@@ -136,7 +137,7 @@ def get_overlay_image():
                     colour = "blue" if user == "user1" else "green"
                     for event in events:
                         wrapped_text = textwrap.fill(event, width=15)
-                        draw.multiline_text((1155, offset), wrapped_text, fill=colour, font=font)  
+                        draw.multiline_text((1175, offset), wrapped_text, fill=colour, font=font)  
                         offset+= 50
                         offset += len(wrapped_text.split('\n')) * 25
 
@@ -148,7 +149,7 @@ def get_overlay_image():
                     colour = "blue" if user == "user1" else "green"
                     for event in events:
                         wrapped_text = textwrap.fill(event, width=15)
-                        draw.multiline_text((1520, offset), wrapped_text, fill=colour, font=font)  
+                        draw.multiline_text((1540, offset), wrapped_text, fill=colour, font=font)  
                         offset+= 50
                         offset += len(wrapped_text.split('\n')) * 25
 
