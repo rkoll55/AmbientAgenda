@@ -1,23 +1,11 @@
 {
     "Monday": {
-        "user1": "Monday\n\f"
+        "user1": "4 PM soccor game\n\n6 PM dinner game\n\n3 PM among us game\n2 AM computer game\n6 PM card games\nwith the boys\n"
     },
-    "Tuesday": {
-        "user1": "Tuesday\n\f"
-    },
-    "Wednesday": {
-        "user1": "Wednesday\n\f"
-    },
-    "Thursday": {
-        "user1": "Thursday\n\f"
-    },
-    "Friday": {
-        "user1": "Friday\n\f"
-    },
-    "Saturday": {
-        "user1": "Sattyday\n\f"
-    },
-    "Sunday": {
-        "user1": "Sundy\n\f"
-    }
+    "Tuesday": {},
+    "Wednesday": {},
+    "Thursday": {},
+    "Friday": {},
+    "Saturday": {},
+    "Sunday": {}
 }

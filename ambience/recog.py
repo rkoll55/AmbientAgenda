@@ -27,10 +27,10 @@ def main():
     #recognize_text(upscale('images/bigwords.png'))
     #recognize_text(cv2.imread('images/bigwords.png'))
     
-    days = box_recog('images/marked_template.png') # recognise the day boxes 
+    days = box_recog('images/time_template_advanced.png') # recognise the day boxes 
     for day in days.keys():
         print(f"{day}: {days[day]}")
-    write_to_temp(days, username)
+    write_to_temp(days, username, infile="json/template.json", outfile="json/time_test.json")
     return
 
 def write_to_temp(days, username, infile="json/template.json", outfile="json/output.json"): 
@@ -41,12 +41,13 @@ def write_to_temp(days, username, infile="json/template.json", outfile="json/out
     
     for day in json_template.keys():
         if days[day] != "":
-            if username in json_template[day].keys():
-                # recognize what text is ours and what isnt -- MAYBE WE CAN FILTER COLOUR IN THE RECOG???
-                
-                json_template[day][username] += days[day]
-            else:
-                json_template[day][username] = days[day]
+            for time in json_template[day].keys():
+                if days[day][time] != "":
+                    if username in json_template[day][time].keys():
+                        # recognize what text is ours and what isnt -- MAYBE WE CAN FILTER COLOUR IN THE RECOG???
+                        json_template[day][time][username] += days[day][time]
+                    else:
+                        json_template[day][time][username] = days[day][time]
         
 
     with open(outfile, 'w') as outfile:
@@ -155,14 +156,14 @@ def box_recog(path, debug=False):
             x, y, w, h = cv2.boundingRect(np.array(hull_points))
             # Draw bounding box around the square
             if w > 50 and h > 50:
-                print(f"Found a convex box with\nx: {x}\ny: {y}\nw: {w}\nh: {h}\n")
+                #print(f"Found a convex box with\nx: {x}\ny: {y}\nw: {w}\nh: {h}\n")
                 cropped_image = image[y+10:y+h-10, x+10:x+w-10]
                 #cv2.imshow(str(i), cropped_image)
                 cv2.drawContours(image, [hull_draw], 0, colors[i%3], 5)
                 i += 1
                 boxes.append((cropped_image, (x, y, w, h)))
     # Display the image with detected squares
-    print(f"BOXLEN {len(boxes)}")
+    #print(f"BOXLEN {len(boxes)}")
 
     # Sorting our boxes 
     
@@ -170,14 +171,85 @@ def box_recog(path, debug=False):
         if box[1][2] > box[1][3]: # Sat or Sun
             return 10000 + box[1][0] # skew sort by pushing them back
         else: 
-            return box[1][0]
+           return box[1][0]
 
     boxes = sorted(boxes, key=sort_boxes)
     
     days = {'Monday': '', 'Tuesday': '', 'Wednesday': '', 'Thursday': '', 'Friday':'', 'Saturday':'', 'Sunday':''}
-    text = [recognize_text(img[0]) for img in boxes] 
+    text = [recognize_text(img[0]) for img in boxes]
+     
     for i in range(len(text)):
         days[list(days.keys())[i]] = text[i]
+    
+    for day in days.keys():
+        times = {"00": '',"01": '',"02": '',
+        "03": '', 
+        "04": '', 
+        "05": '', 
+        "06": '', 
+        "07": '', 
+        "08": '', 
+        "09": '', 
+        "10": '', 
+        "11": '', 
+        "12": '', 
+        "13": '', 
+        "14": '', 
+        "15": '', 
+        "16": '', 
+        "17": '', 
+        "18": '', 
+        "19": '', 
+        "20": '', 
+        "21": '', 
+        "22": '', 
+        "23": '', 
+        "24": '', 
+        }
+        temp = [x for x in days[day].split('\n') if x != ''] 
+        # go backwards to link up newline sep'd events
+        buff = ''
+        # first pass: join continuated events 
+        for line in reversed(temp):
+            #check buffer - anything from the line below that isn't a separate time
+            if buff != '':
+                temp[temp.index(line)] += ' ' + buff
+                buff = ''
+            if not line[0].isnumeric():
+                buff += line
+                temp.pop(temp.index(line))        
+
+        #second pass: check for time
+        for line in temp:
+
+            splat = line.split(' ')
+            if line.split(' ')[0].isnumeric() and line.split(' ')[1] in ('AM','PM', 'am','pm','Am','aM','pM','Pm'):
+               #incorrectly formatted 
+                splat[0] = splat[0] + splat[1].upper()
+                splat.pop(1)
+                temp[temp.index(line)] = ' '.join(splat)
+            elif len(splat[0]) in [3, 4]:
+                time, period = splat[0][:-2], splat[0][-2:]
+                splat[0] = time + period.upper()
+                temp[temp.index(line)] = ' '.join(splat)
+        # Begin sorting
+        for line in temp:
+            # Split the string into the numerical part and the AM/PM part
+            time, period = line.split(' ')[0][:-2], line.split(' ')[0][-2:]
+
+            # Convert to 24-hour format
+            if period == 'PM' and time != '12':
+                time = str(int(time) + 12)
+            elif period == 'AM' and time == '12':
+                time = '00'
+            elif period == 'AM' and int(time) < 10:
+                time = '0' + time
+            times[time] += line + '\n'
+        days[day] = times
+        print(day)
+
+        #last pass: create dict key in 24hr time
+        print(temp)
     
 
     if debug:
