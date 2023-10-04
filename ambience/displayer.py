@@ -276,6 +276,7 @@ def clear_image():
 def time_thread():
     played = False
     numplayed = 0
+    counter = 0
     pattern = r'([1-9]|1[0-2])(am|pm)'
 
     while True:
