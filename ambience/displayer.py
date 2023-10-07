@@ -8,6 +8,8 @@ from playsound import playsound
 import threading 
 import datetime
 import re
+import pygame
+
 
 
 # added for google calendar 
@@ -28,10 +30,15 @@ original_image = Image.open("images/template.png")
 panel = None
 label = None
 
+pygame.mixer.init()
+
 
 def play_sound(type="base"):
     print(type)
-    playsound("sounds/chime.mp3") 
+    #playsound("sounds/chime.mp3") 
+
+    pygame.mixer.music.load("sounds/chime.mp3")
+    pygame.mixer.music.play()
 
 # for initial setup of access tokens for google calendar
 def OAuthHandler():
