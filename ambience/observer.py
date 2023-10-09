@@ -1,5 +1,5 @@
 # Observer Script
-import RPi as GPIO #Need to install "Microsoft C++ Build Tools first"
+import RPi.GPIO as GPIO #Need to install "Microsoft C++ Build Tools first"
 import subprocess
 from picamera import PiCamera
 import time
