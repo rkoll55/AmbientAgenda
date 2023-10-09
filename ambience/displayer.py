@@ -106,35 +106,16 @@ def get_overlay_image():
     for day, day_info in js.items():
         if day == "Monday":
             offset = 150
-            if isinstance(day_data, dict):
-                for user, events in day_data.items():
-                    colour = "purple" if user == "user1" else "green"
-                    for event in events:
-                        wrapped_text = textwrap.fill(event, width=15)
-                        draw.multiline_text((100, offset), wrapped_text, fill=colour, font=font)  
-                        offset+= 50
-                        offset += len(wrapped_text.split('\n')) * 25
+            for info, day_data in day_info.items():
+                if isinstance(day_data, dict):
+                    for user, events in day_data.items():
+                        colour = "blue" if user == "user1" else "green"
+                        for event in events:
+                            wrapped_text = textwrap.fill(event, width=15)
+                            draw.multiline_text((100, offset), wrapped_text, fill=colour, font=font)  
+                            offset+= 50
+                            offset += len(wrapped_text.split('\n')) * 25
 
-#         elif day == "Tuesday":
-#             offset = 150
-#             if isinstance(day_data, dict):
-#                 for user, events in day_data.items():
-#                     colour = "purple" if user == "user1" else "green"
-#                     for event in events:
-#                         wrapped_text = textwrap.fill(event, width=15)
-#                         draw.multiline_text((450, offset), wrapped_text, fill=colour, font=font)  
-#                         offset+= 50
-#                         offset += len(wrapped_text.split('\n')) * 25
-# =======
-#             for info, day_data in day_info.items():
-#                 if isinstance(day_data, dict):
-#                     for user, events in day_data.items():
-#                         colour = "blue" if user == "user1" else "green"
-#                         for event in events:
-#                             wrapped_text = textwrap.fill(event, width=15)
-#                             draw.multiline_text((100, offset), wrapped_text, fill=colour, font=font)  
-#                             offset+= 50
-#                             offset += len(wrapped_text.split('\n')) * 25
         elif day == "Tuesday":
             offset = 150
             for info, day_data in day_info.items():
@@ -145,7 +126,8 @@ def get_overlay_image():
                             wrapped_text = textwrap.fill(event, width=15)
                             draw.multiline_text((450, offset), wrapped_text, fill=colour, font=font)  
                             offset+= 50
-                            offset += len(wrapped_text.split('\n')) * 25        
+                            offset += len(wrapped_text.split('\n')) * 25
+        
         elif day == "Wednesday":
             offset = 150
             for info, day_data in day_info.items():
