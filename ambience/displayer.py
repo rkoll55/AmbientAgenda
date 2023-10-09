@@ -8,6 +8,8 @@ from playsound import playsound
 import threading 
 import datetime
 import re
+import pygame
+
 
 
 # added for google calendar 
@@ -28,10 +30,15 @@ original_image = Image.open("images/template.png")
 panel = None
 label = None
 
+pygame.mixer.init()
+
 
 def play_sound(type="base"):
     print(type)
-    playsound("sounds/chime.mp3") 
+    #playsound("sounds/chime.mp3") 
+
+    pygame.mixer.music.load("sounds/chime.mp3")
+    pygame.mixer.music.play()
 
 # for initial setup of access tokens for google calendar
 def OAuthHandler():
@@ -96,7 +103,7 @@ def get_overlay_image():
     # font = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeMonoBoldOblique.ttf", 36, encoding="unic")
     js = read_json()
 
-    for day, day_data in js.items():
+    for day, day_info in js.items():
         if day == "Monday":
             offset = 150
             if isinstance(day_data, dict):
@@ -108,74 +115,99 @@ def get_overlay_image():
                         offset+= 50
                         offset += len(wrapped_text.split('\n')) * 25
 
+#         elif day == "Tuesday":
+#             offset = 150
+#             if isinstance(day_data, dict):
+#                 for user, events in day_data.items():
+#                     colour = "purple" if user == "user1" else "green"
+#                     for event in events:
+#                         wrapped_text = textwrap.fill(event, width=15)
+#                         draw.multiline_text((450, offset), wrapped_text, fill=colour, font=font)  
+#                         offset+= 50
+#                         offset += len(wrapped_text.split('\n')) * 25
+# =======
+#             for info, day_data in day_info.items():
+#                 if isinstance(day_data, dict):
+#                     for user, events in day_data.items():
+#                         colour = "blue" if user == "user1" else "green"
+#                         for event in events:
+#                             wrapped_text = textwrap.fill(event, width=15)
+#                             draw.multiline_text((100, offset), wrapped_text, fill=colour, font=font)  
+#                             offset+= 50
+#                             offset += len(wrapped_text.split('\n')) * 25
         elif day == "Tuesday":
             offset = 150
-            if isinstance(day_data, dict):
-                for user, events in day_data.items():
-                    colour = "purple" if user == "user1" else "green"
-                    for event in events:
-                        wrapped_text = textwrap.fill(event, width=15)
-                        draw.multiline_text((450, offset), wrapped_text, fill=colour, font=font)  
-                        offset+= 50
-                        offset += len(wrapped_text.split('\n')) * 25
-        
+            for info, day_data in day_info.items():
+                if isinstance(day_data, dict):
+                    for user, events in day_data.items():
+                        colour = "blue" if user == "user1" else "green"
+                        for event in events:
+                            wrapped_text = textwrap.fill(event, width=15)
+                            draw.multiline_text((450, offset), wrapped_text, fill=colour, font=font)  
+                            offset+= 50
+                            offset += len(wrapped_text.split('\n')) * 25        
         elif day == "Wednesday":
             offset = 150
-            if isinstance(day_data, dict):
-                for user, events in day_data.items():
-                    colour = "blue" if user == "user1" else "green"
-                    for event in events:
-                        wrapped_text = textwrap.fill(event, width=15)
-                        draw.multiline_text((810, offset), wrapped_text, fill=colour, font=font)  
-                        offset+= 50
-                        offset += len(wrapped_text.split('\n')) * 25
+            for info, day_data in day_info.items():
+                if isinstance(day_data, dict):
+                    for user, events in day_data.items():
+                        colour = "blue" if user == "user1" else "green"
+                        for event in events:
+                            wrapped_text = textwrap.fill(event, width=15)
+                            draw.multiline_text((810, offset), wrapped_text, fill=colour, font=font)  
+                            offset+= 50
+                            offset += len(wrapped_text.split('\n')) * 25
         
         elif day == "Thursday":
             offset = 150
-            if isinstance(day_data, dict):
-                for user, events in day_data.items():
-                    colour = "blue" if user == "user1" else "green"
-                    for event in events:
-                        wrapped_text = textwrap.fill(event, width=15)
-                        draw.multiline_text((1175, offset), wrapped_text, fill=colour, font=font)  
-                        offset+= 50
-                        offset += len(wrapped_text.split('\n')) * 25
+            for info, day_data in day_info.items():
+                if isinstance(day_data, dict):
+                    for user, events in day_data.items():
+                        colour = "blue" if user == "user1" else "green"
+                        for event in events:
+                            wrapped_text = textwrap.fill(event, width=15)
+                            draw.multiline_text((1175, offset), wrapped_text, fill=colour, font=font)  
+                            offset+= 50
+                            offset += len(wrapped_text.split('\n')) * 25
 
 
         elif day == "Friday":
             offset = 150
-            if isinstance(day_data, dict):
-                for user, events in day_data.items():
-                    colour = "blue" if user == "user1" else "green"
-                    for event in events:
-                        wrapped_text = textwrap.fill(event, width=15)
-                        draw.multiline_text((1540, offset), wrapped_text, fill=colour, font=font)  
-                        offset+= 50
-                        offset += len(wrapped_text.split('\n')) * 25
+            for info, day_data in day_info.items():
+                if isinstance(day_data, dict):
+                    for user, events in day_data.items():
+                        colour = "blue" if user == "user1" else "green"
+                        for event in events:
+                            wrapped_text = textwrap.fill(event, width=15)
+                            draw.multiline_text((1540, offset), wrapped_text, fill=colour, font=font)  
+                            offset+= 50
+                            offset += len(wrapped_text.split('\n')) * 25
 
 
         elif day == "Saturday":
             offset = 750
-            if isinstance(day_data, dict):
-                for user, events in day_data.items():
-                    colour = "blue" if user == "user1" else "green"
-                    for event in events:
-                        wrapped_text = textwrap.fill(event, width=40)
-                        draw.multiline_text((90, offset), wrapped_text, fill=colour, font=font)  
-                        offset+= 50
-                        offset += len(wrapped_text.split('\n')) * 25
+            for info, day_data in day_info.items():
+                if isinstance(day_data, dict):
+                    for user, events in day_data.items():
+                        colour = "blue" if user == "user1" else "green"
+                        for event in events:
+                            wrapped_text = textwrap.fill(event, width=40)
+                            draw.multiline_text((90, offset), wrapped_text, fill=colour, font=font)  
+                            offset+= 50
+                            offset += len(wrapped_text.split('\n')) * 25
 
 
         elif day == "Sunday":
             offset = 750
-            if isinstance(day_data, dict):
-                for user, events in day_data.items():
-                    colour = "blue" if user == "user1" else "green"
-                    for event in events:
-                        wrapped_text = textwrap.fill(event, width=40)
-                        draw.multiline_text((990, offset), wrapped_text, fill=colour, font=font)  
-                        offset+= 50
-                        offset += len(wrapped_text.split('\n')) * 25
+            for info, day_data in day_info.items():
+                if isinstance(day_data, dict):
+                    for user, events in day_data.items():
+                        colour = "blue" if user == "user1" else "green"
+                        for event in events:
+                            wrapped_text = textwrap.fill(event, width=40)
+                            draw.multiline_text((990, offset), wrapped_text, fill=colour, font=font)  
+                            offset+= 50
+                            offset += len(wrapped_text.split('\n')) * 25
 
     return image_with_text
 
@@ -211,7 +243,7 @@ def google_calendar_handler():
             now = datetime.datetime.utcnow().isoformat() + 'Z'
             one_week_from_now = (datetime.datetime.utcnow() + timedelta(weeks=1)).isoformat() + 'Z'
             
-            print('Getting all events for the upcoming week')
+            #print('Getting all events for the upcoming week')
             
             events_result = service.events().list(calendarId='primary', timeMin=now, timeMax=one_week_from_now,
                                                   singleEvents=True, orderBy='startTime').execute()
@@ -219,7 +251,7 @@ def google_calendar_handler():
             events = events_result.get('items', [])
             
             if not events:
-                print('No upcoming events found.')
+                #print('No upcoming events found.')
                 continue  # go to next iteration of the loop
             
             js = read_json()  # read the existing JSON data
@@ -285,33 +317,33 @@ def time_thread():
         day_of_week = current_datetime.strftime("%A")
         current_hour_24 = int(current_datetime.strftime("%H"))
         current_minute = current_datetime.minute
-        print(current_datetime)
+        #print(current_datetime)
 
         
         json_file = read_json()
         #rread the JSON for the day and find the relevant events
         # play the relevant sounds for them and track how many were played
         # if numplayed > 0 and number events > numlpayed play the difference 
-        day_data =  json_file.get(day_of_week, {})
-        if day_data:
-            counter = 0
-            for user, events in day_data.items():
-                for event in events:
-                    match = re.search(pattern, event, re.IGNORECASE)
-
-                    cur_time = int(match.group(1))
-                    if (match.group(2).lower() == "pm"):
-                        cur_time += 12
-                    
-                    if (((cur_time - current_hour_24) == 1) and (counter >= numplayed)):
-                        make_sound(event)
-                    
-                    counter = counter + 1
-
-
-        numplayed = counter
+        times =  json_file.get(day_of_week, {})       
+        counter = 0
         
-        time.sleep(60)
+        for ctime in times:
+            events = times[ctime]
+            if events:
+                for user in events:
+                    cur_time = int(ctime)   
+                    
+                    for event in events[user]:  
+
+                        if (((cur_time - current_hour_24) == 1) and (counter >= numplayed)):
+                            make_sound(event)
+                        counter = counter + 1
+                        print(counter)
+        numplayed = counter
+        print(numplayed)
+
+        
+        time.sleep(30)
  
 if __name__ == "__main__":
     init_display()

@@ -24,8 +24,10 @@ if __name__ == '__main__':
 	#os.mkdir(local_path)
 
 	# Create a file in the local data directory to upload and download
-	local_file_name = "overlay.json"
-	upload_file_path = os.path.join("../../json", local_file_name)
+	local_file_name = "json/overlay.json"
+	#upload_file_path = os.path.join("./json", local_file_name)
+	upload_file_path = local_file_name
+
 
 	# Write text to the file
 	#file = open(file=upload_file_path, mode='w')
