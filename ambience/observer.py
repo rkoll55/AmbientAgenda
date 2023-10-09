@@ -14,14 +14,14 @@ def iothub_client_init():
     client = IoTHubDeviceClient.create_from_connection_string(CONNECTION_STRING)
     return client
 
-LIDR_PIN = 1
-PHOTO_BUTTON_PIN = 2
+LIDR_PIN = 6
+PHOTO_BUTTON_PIN = 7
 TRIGGER_READING = 1500
 
 GPIO.setup(LIDR_PIN, GPIO.IN)
 GPIO.setup(PHOTO_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-camera = PiCamera()
+camera = PiCamera2()
 
 displayer_process = None
 button_pressed = False
