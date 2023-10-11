@@ -250,12 +250,7 @@ def google_calendar_handler():
                 date_obj = parser.parse(start)
                 # Get the day of the week
                 day_of_week = date_obj.strftime("%A")
-                
-                #Format time string
-                # formatted_time = date_obj.strftime('%I%p').lstrip('0').lower()
-                # event_summary = f"{formatted_time} {event['summary']}"
-                # hour_key = formatted_time.upper()[:2]  # Extract the hour in the format "00" to "23"
-
+    
                 formatted_time = date_obj.strftime('%I%p').lower().lstrip('0')  # e.g., "12pm" or "2am"
                 event_summary = f"{formatted_time} {event['summary']}"
                 hour_key = date_obj.strftime('%H')  # This gives the hour in the format "00" to "23"
@@ -274,29 +269,7 @@ def google_calendar_handler():
                             if event_summary not in js[day_of_week][hour_key][user]:
                                 js[day_of_week][hour_key][user].append(event_summary)
                         existing_events.add(event_summary)
-
-
-
-
-                
-                # #Events for user 1
-                # user = 'user1'
-                # if event_summary not in existing_events:
-                #     if day_of_week not in js:
-                #         js[day_of_week] = {user: [event_summary]}
-                #     elif user not in js[day_of_week]:
-                #         js[day_of_week][user] = [event_summary]
-                #     else:
-                #         if event_summary not in js[day_of_week][user]: # check its not a duplicate event 
-                #             js[day_of_week][user].append(event_summary)
-                #         existing_events.add(event_summary)  # mark this event as added
-
-                
-                
-
-
-
-
+    
             # Write updated data back to JSON file
             with open("json/overlay.json", "w") as json_file:
                 json.dump(js, json_file)
