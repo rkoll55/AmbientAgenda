@@ -253,7 +253,7 @@ def google_calendar_handler():
                 day_of_week = date_obj.strftime("%A")
     
                 formatted_time = date_obj.strftime('%I%p').lower().lstrip('0')  # e.g., "12pm" or "2am"
-                event_summary = f"{formatted_time} {event['summary']}"
+                event_summary = f"{formatted_time} {event['summary']}".lower()
                 hour_key = date_obj.strftime('%H')  # This gives the hour in the format "00" to "23"
 
                 # Events for user 1
