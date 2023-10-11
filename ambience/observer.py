@@ -1,7 +1,7 @@
 # Observer Script
 import RPi.GPIO as GPIO #Need to install "Microsoft C++ Build Tools first"
 import subprocess
-from picamera import PiCamera
+from picamera2 import Picamera2 
 import time
 import recog
 from azure.iot.device import IoTHubDeviceClient, Message
@@ -21,7 +21,7 @@ TRIGGER_READING = 1500
 GPIO.setup(LIDR_PIN, GPIO.IN)
 GPIO.setup(PHOTO_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-camera = PiCamera2()
+camera = Picamera2()
 
 displayer_process = None
 button_pressed = False
@@ -32,9 +32,12 @@ try:
         if light_reading >= TRIGGER_READING and displayer_process is None:
             displayer_process = subprocess.Popen(["python3", "displayer_program.py"])
             break
+        break
         
     camera.start_preview()
+    camera.start()
     time.sleep(3)
+    camera.capture_file('capture.jpg')
     while True:
         
         button_state = GPIO.input(PHOTO_BUTTON_PIN)
@@ -48,7 +51,7 @@ try:
         if button_state == GPIO.LOW and not button_pressed:
             # we need to kill the window before capture
 
-            camera.capture('capture.jpg')
+            camera.capture_file('capture.jpg')
             json_object = recog.write_to_temp(recog.box_recog('capture.jpg'), infile="json/template.json", outfile="json/output.json") #has default file paths
             # push to cloud over here
             print("Successfully recognised text")

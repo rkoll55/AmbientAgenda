@@ -206,7 +206,7 @@ read_json()
 def init_display():
     global root, label
     root = tk.Tk()
-    image_with_text = get_overlay_image().resize((640,480))
+    image_with_text = get_overlay_image().resize((660,500))
     photo = ImageTk.PhotoImage(image_with_text)
 
     label = tk.Label(root, image=photo)
