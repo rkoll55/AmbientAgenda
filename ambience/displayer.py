@@ -21,6 +21,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from google.auth import exceptions
 from dateutil import parser
 
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
@@ -48,8 +49,11 @@ def OAuthHandler():
 
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
+            try:
+                creds.refresh(Request())
+            except exceptions.RefreshError:
+                creds = None  # Set creds to None so that new authentication flow will be triggered
+        if not creds:
             flow = InstalledAppFlow.from_client_secrets_file('json/credentials.json', SCOPES)
             creds = flow.run_local_server(port=0)
         
@@ -58,6 +62,7 @@ def OAuthHandler():
 
     service = build('calendar', 'v3', credentials=creds)
     return service
+
 
 def read_json():
     with open("json/overlay.json", "r") as json_file:
@@ -247,21 +252,50 @@ def google_calendar_handler():
                 day_of_week = date_obj.strftime("%A")
                 
                 #Format time string
-                formatted_time = date_obj.strftime('%I%p').lstrip('0').lower()
+                # formatted_time = date_obj.strftime('%I%p').lstrip('0').lower()
+                # event_summary = f"{formatted_time} {event['summary']}"
+                # hour_key = formatted_time.upper()[:2]  # Extract the hour in the format "00" to "23"
 
+                formatted_time = date_obj.strftime('%I%p').lower().lstrip('0')  # e.g., "12pm" or "2am"
                 event_summary = f"{formatted_time} {event['summary']}"
-                
-                #Events for user 1
+                hour_key = date_obj.strftime('%H')  # This gives the hour in the format "00" to "23"
+
+                # Events for user 1
                 user = 'user1'
                 if event_summary not in existing_events:
                     if day_of_week not in js:
-                        js[day_of_week] = {user: [event_summary]}
-                    elif user not in js[day_of_week]:
-                        js[day_of_week][user] = [event_summary]
+                        js[day_of_week] = {hour_key: {user: [event_summary]}}
                     else:
-                        if event_summary not in js[day_of_week][user]: # check its not a duplicate event 
-                            js[day_of_week][user].append(event_summary)
-                        existing_events.add(event_summary)  # mark this event as added
+                        if hour_key not in js[day_of_week]:
+                            js[day_of_week][hour_key] = {user: [event_summary]}
+                        elif user not in js[day_of_week][hour_key]:
+                            js[day_of_week][hour_key][user] = [event_summary]
+                        else:
+                            if event_summary not in js[day_of_week][hour_key][user]:
+                                js[day_of_week][hour_key][user].append(event_summary)
+                        existing_events.add(event_summary)
+
+
+
+
+                
+                # #Events for user 1
+                # user = 'user1'
+                # if event_summary not in existing_events:
+                #     if day_of_week not in js:
+                #         js[day_of_week] = {user: [event_summary]}
+                #     elif user not in js[day_of_week]:
+                #         js[day_of_week][user] = [event_summary]
+                #     else:
+                #         if event_summary not in js[day_of_week][user]: # check its not a duplicate event 
+                #             js[day_of_week][user].append(event_summary)
+                #         existing_events.add(event_summary)  # mark this event as added
+
+                
+                
+
+
+
 
             # Write updated data back to JSON file
             with open("json/overlay.json", "w") as json_file:
@@ -308,15 +342,20 @@ def time_thread():
         # if numplayed > 0 and number events > numlpayed play the difference 
         times =  json_file.get(day_of_week, {})       
         counter = 0
-        
-        for ctime in times:
-            events = times[ctime]
-            if events:
-                for user in events:
-                    cur_time = int(ctime)   
-                    
-                    for event in events[user]:  
 
+
+        # for ctime in times:
+        #     events = times[ctime]
+        #     if events:
+        #         for user in events:
+        #             cur_time = int(ctime)   
+                    
+        #             for event in events[user]:  
+
+        for user, user_events in times.items():
+            for ctime, events_list in user_events.items():
+                cur_time = int(ctime)  
+                for event in events_list:
                         if (((cur_time - current_hour_24) == 1) and (counter >= numplayed)):
                             make_sound(event)
                         counter = counter + 1
@@ -324,7 +363,6 @@ def time_thread():
         numplayed = counter
         print(numplayed)
 
-        
         time.sleep(30)
  
 if __name__ == "__main__":
