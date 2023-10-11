@@ -326,8 +326,8 @@ def time_thread():
                     
         #             for event in events[user]:  
 
-        for user, user_events in times.items():
-            for ctime, events_list in user_events.items():
+        for ctime, user_events in times.items():
+            for user, events_list in user_events.items():
                 cur_time = int(ctime)  
                 for event in events_list:
                         if (((cur_time - current_hour_24) == 1) and (counter >= numplayed)):
