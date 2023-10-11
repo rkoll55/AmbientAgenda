@@ -9,6 +9,7 @@ import threading
 import datetime
 import re
 import pygame
+import weather
 
 
 
@@ -328,6 +329,7 @@ def time_thread():
         time.sleep(30)
  
 if __name__ == "__main__":
+    weather.play_weather()
     init_display()
     t1 = threading.Thread(target=async_loop)
     t1.start()
