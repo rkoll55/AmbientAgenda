@@ -105,7 +105,8 @@ def get_overlay_image():
     sound_played = False
     image_with_text = original_image.copy()
     draw = ImageDraw.Draw(image_with_text)
-    font = ImageFont.truetype("/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf", 36, encoding="unic")
+    #font = ImageFont.truetype("/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf", 36, encoding="unic")
+    font = ImageFont.load_default()
     # font = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeMonoBoldOblique.ttf", 36, encoding="unic")
     js = read_json()
 
