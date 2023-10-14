@@ -42,7 +42,7 @@ def play_sound(type="base"):
     pygame.mixer.music.load("sounds/chime.mp3")
     pygame.mixer.music.play()
 
-# for initial setup of access tokens for google calendar
+# For setting up google calendar credentials
 def OAuthHandler():
     creds = None
     if os.path.exists('json/token.json'):
@@ -53,7 +53,7 @@ def OAuthHandler():
             try:
                 creds.refresh(Request())
             except exceptions.RefreshError:
-                creds = None  # Set creds to None so that new authentication flow will be triggered
+                creds = None 
         if not creds:
             flow = InstalledAppFlow.from_client_secrets_file('json/credentials.json', SCOPES)
             creds = flow.run_local_server(port=0)
@@ -90,10 +90,8 @@ def make_sound(event):
         play_sound("base")
 
 
-# method to get all the existing events to check duplicate events 
 def get_all_existing_events(js):
     existing_events = set()
-    # may need js = read_json() here 
     for day, day_data in js.items():
         for user, events in day_data.items():
             for event in events:
@@ -106,7 +104,6 @@ def get_overlay_image():
     image_with_text = original_image.copy()
     draw = ImageDraw.Draw(image_with_text)
     font = ImageFont.truetype("/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf", 36, encoding="unic")
-    # font = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeMonoBoldOblique.ttf", 36, encoding="unic")
     js = read_json()
 
     for day, day_info in js.items():
@@ -201,7 +198,6 @@ def get_overlay_image():
 
 read_json()
 
-#initialises Tkinter window once with the label to display the image, rather than recreating the window every time the image is updated.
 def init_display():
     global root, label
     root = tk.Tk()
@@ -214,7 +210,6 @@ def init_display():
     
 def async_loop():
     while True:
-        #print("Async loop is running!")
         time.sleep(5) 
 
         #if the buttor is pressed
@@ -222,12 +217,10 @@ def async_loop():
         #else
         update_image()
 
-# for google calendar
 def google_calendar_handler():
-    while True:  # keep this thread always running
+    while True: 
         try:
             service = OAuthHandler()
-            
             now = datetime.datetime.utcnow().isoformat() + 'Z'
             one_week_from_now = (datetime.datetime.utcnow() + timedelta(weeks=1)).isoformat() + 'Z'
             
@@ -239,24 +232,20 @@ def google_calendar_handler():
             events = events_result.get('items', [])
             
             if not events:
-                #print('No upcoming events found.')
-                continue  # go to next iteration of the loop
+                continue
             
             js = read_json()  # read the existing JSON data
             existing_events = get_all_existing_events(js)
 
             for event in events:
                 start = event['start'].get('dateTime', event['start'].get('date'))
-                # Parsing the date string to datetime object
                 date_obj = parser.parse(start)
-                # Get the day of the week
                 day_of_week = date_obj.strftime("%A")
     
-                formatted_time = date_obj.strftime('%I%p').lower().lstrip('0')  # e.g., "12pm" or "2am"
+                formatted_time = date_obj.strftime('%I%p').lower().lstrip('0')
                 event_summary = f"{formatted_time} {event['summary']}".lower()
-                hour_key = date_obj.strftime('%H')  # This gives the hour in the format "00" to "23"
+                hour_key = date_obj.strftime('%H')
 
-                # Events for user 1
                 user = 'user1'
                 if event_summary not in existing_events:
                     if day_of_week not in js:
@@ -271,15 +260,14 @@ def google_calendar_handler():
                                 js[day_of_week][hour_key][user].append(event_summary)
                         existing_events.add(event_summary)
     
-            # Write updated data back to JSON file
+            # Write data to JSON file
             with open("json/overlay.json", "w") as json_file:
                 json.dump(js, json_file)
             
         except HttpError as error:
             print('An error occurred: %s' % error)
         
-        # sleep for 100 seconds before rechecking for events added to google calendar 
-        time.sleep(100)
+        time.sleep(30)
 
 
 def update_image():
@@ -307,8 +295,6 @@ def time_thread():
         day_of_week = current_datetime.strftime("%A")
         current_hour_24 = int(current_datetime.strftime("%H"))
         current_minute = current_datetime.minute
-        #print(current_datetime)
-
         
         json_file = read_json()
         #rread the JSON for the day and find the relevant events
@@ -316,15 +302,6 @@ def time_thread():
         # if numplayed > 0 and number events > numlpayed play the difference 
         times =  json_file.get(day_of_week, {})       
         counter = 0
-
-
-        # for ctime in times:
-        #     events = times[ctime]
-        #     if events:
-        #         for user in events:
-        #             cur_time = int(ctime)   
-                    
-        #             for event in events[user]:  
 
         for ctime, user_events in times.items():
             for user, events_list in user_events.items():
