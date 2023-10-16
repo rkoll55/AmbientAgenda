@@ -206,7 +206,7 @@ read_json()
 def init_display():
     global root, label
     root = tk.Tk()
-    image_with_text = get_overlay_image().resize((660,500))
+    image_with_text = get_overlay_image().resize((680,455))
     photo = ImageTk.PhotoImage(image_with_text)
 
     label = tk.Label(root, image=photo)
@@ -285,7 +285,7 @@ def google_calendar_handler():
 
 def update_image():
     overlay = get_overlay_image()
-    photo = ImageTk.PhotoImage(overlay).resize((640,480))
+    photo = ImageTk.PhotoImage(overlay).resize((640,455))
 
     label.config(image=photo)
     label.image = photo
