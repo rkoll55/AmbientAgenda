@@ -285,7 +285,7 @@ def google_calendar_handler():
 
 def update_image():
     overlay = get_overlay_image()
-    photo = ImageTk.PhotoImage(overlay).resize((640,480))
+    photo = ImageTk.PhotoImage(overlay.resize((640,480)))
 
     label.config(image=photo)
     label.image = photo
