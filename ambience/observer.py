@@ -73,7 +73,7 @@ try:
             print("Attempting Capture.")
             capture_photo(camera)
             #Sending to text recognition script
-            json_object = recog.write_to_temp(recog.box_recog('capture.jpg'), infile="json/template.json", outfile="json/output.json") #has default file paths
+            json_object = recog.write_to_temp(recog.box_recog('capture.jpg', real=True), infile="json/template.json", outfile="json/output.json") #has default file paths
             # push to cloud over here
             print("Successfully recognised text")
             
