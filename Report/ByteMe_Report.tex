@@ -1,0 +1,117 @@
+\documentclass[11pt, a4, oneside]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usetikzlibrary{trees}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{placeins}
+\usepackage{microtype}
+
+
+\graphicspath{ {images/} }
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,      
+    urlcolor=blue,
+}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+
+\title{Team Technical Report}
+\author{Matilda Damman, Jessica Froio, Rohan Kollambalath,\\ Aiden Richards, Tobias Turner, Gil Wise}
+\date{October 20th 2023}
+
+\begin{document}
+
+\maketitle
+\newpage	
+\tableofcontents
+\newpage	
+
+\section{Introduction}
+\subsection{What is AmbientAgenda?}
+\noindent AmbientAgenda is an innovative device which uses Sony projection technology to harmoniously integrate a shared calendar into any home environment. What sets AmbientAgenda apart from conventional shared calendars is its ambient nature. Through novel use of sight and sound, our system projects upcoming events for all family members onto a household surface, all while preserving the ambiance of the family's living space. \par
+\medskip
+
+\noindent Users can create or join groups on our website, which is the only interaction with our system that involves using a keyboard. Within these groups, events are easily shared and coordinated. To add an event, users simply write into the designated spaces on the projected calendar template. Using cutting-edge Machine Learning technology by computer vision and the Tesseract engine, our system recognises the handwritten input and updates all connected members' calendars with a simple button press in real-time. AmbientAgenda also features a unique auditory element that provides users with both themed reminders for upcoming events and weather update alerts. \par
+\medskip
+
+\noindent Recognizing the value of existing calendar technologies and the challenges of transitioning users to new systems, AmbientAgenda smoothly integrates with Google Calendar by automatically fetching events and updating the projection in real-time. At its core, AmbientAgenda operates on the Raspberry Pi OS and boosts its capabilities by integrating with cloud services through Azure, ensuring a reliable and efficient user experience. \par
+
+\subsection{What makes AmbientAgenda significant and innovative?}
+\noindent AmbientAgenda goes beyond traditional calendar interfaces, offering a unique solution to family event coordination and time management. Our systems unique selling point lies in its ability to reshape how we stay connected and organised. We are transforming shared spaces within our homes into interactive hubs of information, transforming the routine task of checking one's calendar from a chore into an intuitive, ambient experience. \par
+\medskip
+
+\noindent Our system is designed to complement platforms like Google Calendar rather than compete with them. By smoothly integrating systems, we aim to enhance how users engage with familiar tools. Without needing to completely change systems, families can access and interact with all their calendar data projected within their own homes. \par
+\medskip
+
+\noindent The Internet of Things (IoT) refers to the collective network of connected devices and technology which facilitates communication between devices and the cloud, as well as between the devices themselves, to integrate everyday “things” with the internet (AWS, 2022). AmbientAgenda exemplifies the IoTs potential to transform traditional objects into smart, interconnected devices that enhance user experience and efficiency. Embracing the essence of IoT, we are bridging the gap between the digital and the tangible, fostering a newfound sense of connection that makes loved ones feel just a glance away. \par
+
+\subsection{What Problems does AmbientAgenda solve?}
+
+\noindent Despite the increased connectivity offered by our devices in todays continuously evolving digital world, many of us feel more disconnected from those around us than ever before. Being inseparable from our smartphones has come with a social cost (Lucero et al., 2013). When spending time with friends and family, its common for us to be glued to our screens, neglecting those in our immediate presence. This behaviour is known as phubbing. Studies conducted by Al-Saggaf \& MacCulloch found that phubbing causes depression, loneliness and anxiety, as well as lowering levels of happiness, family connectedness, and relationship satisfaction (Al-Saggaf \& MacCulloch, 2022). Furthermore, we tend to engage in phubbing more often with the people we are closest to, and they are the ones who are most adversely affected by this behaviour, particularly older adults (Al-Saggaf \& MacCulloch, 2022). In recognition of this, our calendar interface does not require the use of a phone. Whilst many existing calendar platforms designed to promote social engagement ironically hinder connection by demanding excessive attention, AmbientAgenda is different. Our system has been designed to exist subtly in the background of a household, always available without intrusive notifications or the need for constant user actions. \par
+\medskip
+
+\noindent Another challenge families often face when planning events is aligning their schedules. With AmbientAgenda, every family members plans for the week ahead are always available at a glance. The living space itself serves as a reminder of your family's commitments, which reduces the likelihood of missing them. Furthermore, by granting equal privileges to each user, the system ensures that the responsibility of event planning does not burden one individual.\par
+
+\section{Section}
+\section{Section}
+\section{Section}
+\section{Section}
+\section{Section}
+\section{Section}
+
+% \begin{figure}[h]
+%     \centering
+%     \includegraphics[width=1\textwidth]{Images/task14_setup.png}
+%     \caption{Setting Up the CA}
+%     \label{fig:vul}
+% \end{figure}
+% \FloatBarrier
+
+% \begin{verbatim}
+%     openssl req -new -x509 -keyout ca.key -out ca.crt -config ../openssl.cnf
+% \end{verbatim}
+
+\section{Appendix and Supporting materials}
+% This report is written in \LaTeX{}, with figures and listing shown below:\newline
+
+% \begin{thebibliography}{9}
+% \bibitem{threat} 
+% A. Shostack
+% \textit{Threat modeling}.
+% Indianapolis: John Wiley \& Sons, 2014.
+% \end{thebibliography}
+
+\end{document}
