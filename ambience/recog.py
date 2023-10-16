@@ -27,7 +27,7 @@ def main():
     #recognize_text(upscale('images/bigwords.png'))
     #recognize_text(cv2.imread('images/bigwords.png'))
     
-    days = box_recog('images/time_template_advanced.png') # recognise the day boxes 
+    days = box_recog('images/poll.jpg', debug=True, real = True) # recognise the day boxes 
     for day in days.keys():
         print(f"{day}: {days[day]}")
     write_to_temp(days, username, infile="json/template.json", outfile="json/time_test.json")
@@ -110,63 +110,85 @@ def recognize_text(image, debug=False):
 
 
 
-def box_recog(path, debug=False):
+def box_recog(path, debug=False, real=False):
     # Read the input image
     
     image = cv2.imread(path)
     # Convert the image to grayscale
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # Apply edge detection using Canny
-    edges = cv2.Canny(gray, 50, 150, apertureSize=3)
-
-    # Find contours in the edge-detected image
-    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    boxes = []
-    colors = [(0,255,0),(255,0,0),(0,0,255)]
-    # Loop through the contours and identify squares
-    i = 0
-    for contour in contours:
-        # Approximate the contour to a polygon
-        epsilon = 0.04 * cv2.arcLength(contour, True)
-        approx = cv2.approxPolyDP(contour, epsilon, True)
-        
-        # Check if the polygon has 4 corners (a square) - not done 
-        # if len(approx) == 10:
-            
-        #     # Calculate the aspect ratio to distinguish squares from rectangles
-        #     x, y, w, h = cv2.boundingRect(approx)
-        #     aspect_ratio = float(w) / h
-        #     if (0.5 <= aspect_ratio <= 1 or 1.5 <= aspect_ratio) <= 4 and w > 50 and h > 100:
-        #         # Draw bounding box around the square
-        #         cv2.drawContours(image, [approx], 0, colors[i%3], 10)
-        #         print(f"Found a  box with\nx: {x}\ny: {y}\nw: {w}\nh: {h}\n")
-        #         i += 1
-        #         #cropped_image = image[y:y+h, x:x+w]
-
-        # CONVEX HULL FOR HIGHER DIMENSIONAL SHAPES    
-        if 3 < len(approx):    
-            # Calculate the aspect ratio to distinguish squares from rectangles
-            hull = cv2.convexHull(approx, returnPoints=False)
-            hull_draw = cv2.convexHull(approx)
-            hull_points = [approx[x] for x in hull]
-            hull_points = [points[0] for points in hull_points]
-            hull_points = [points[0] for points in hull_points]
-            x, y, w, h = cv2.boundingRect(np.array(hull_points))
-            # Draw bounding box around the square
-            if w > 50 and h > 50:
-                #print(f"Found a convex box with\nx: {x}\ny: {y}\nw: {w}\nh: {h}\n")
-                cropped_image = image[y+10:y+h-10, x+10:x+w-10]
-                #cv2.imshow(str(i), cropped_image)
-                cv2.drawContours(image, [hull_draw], 0, colors[i%3], 5)
-                i += 1
-                boxes.append((cropped_image, (x, y, w, h)))
-    # Display the image with detected squares
-    #print(f"BOXLEN {len(boxes)}")
-
-    # Sorting our boxes 
     
+
+    def box_seeker(image, whole = False):
+    
+        boxes = []
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+        # Apply edge detection using Canny
+        edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+
+        # Find contours in the edge-detected image
+        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        colors = [(0,255,0),(255,0,0),(0,0,255)]
+        # Loop through the contours and identify squares
+        i = 0
+
+        for contour in contours:
+            # Approximate the contour to a polygon
+            epsilon = 0.04 * cv2.arcLength(contour, True)
+            approx = cv2.approxPolyDP(contour, epsilon, True)
+            
+            # Check if the polygon has 4 corners (a square) - not done 
+            # if len(approx) == 10:
+                
+            #     # Calculate the aspect ratio to distinguish squares from rectangles
+            #     x, y, w, h = cv2.boundingRect(approx)
+            #     aspect_ratio = float(w) / h
+            #     if (0.5 <= aspect_ratio <= 1 or 1.5 <= aspect_ratio) <= 4 and w > 50 and h > 100:
+            #         # Draw bounding box around the square
+            #         cv2.drawContours(image, [approx], 0, colors[i%3], 10)
+            #         print(f"Found a  box with\nx: {x}\ny: {y}\nw: {w}\nh: {h}\n")
+            #         i += 1
+            #         #cropped_image = image[y:y+h, x:x+w]
+            # CONVEX HULL FOR HIGHER DIMENSIONAL SHAPES    
+            if len(approx) == 4:    
+                # Calculate the aspect ratio to distinguish squares from rectangles
+                hull = cv2.convexHull(approx, returnPoints=False)
+                hull_draw = cv2.convexHull(approx)
+                hull_points = [approx[x] for x in hull]
+                hull_points = [points[0] for points in hull_points]
+                hull_points = [points[0] for points in hull_points]
+                x, y, w, h = cv2.boundingRect(np.array(hull_points))
+                # Draw bounding box around the square
+
+                #find relevant distances to take out the 
+                def dist(hull_points):
+                    return True 
+                if w > 50 and h > 50 and len(hull_points) > 3 and dist(hull_points):
+                    cropped_image = image[y+10:y+h-10, x+10:x+w-10]
+                    if debug:
+                        #Image.fromarray(cropped_image).show()
+                        print(f"Found a convex box with\nx: {x}\ny: {y}\nw: {w}\nh: {h}\n")
+                        #cv2.imshow(str(i), cropped_image)
+                        if whole:
+                            cv2.drawContours(image, [hull_draw], 0, colors[i%3], 5)
+                    i += 1
+                    boxes.append((cropped_image, (x, y, w, h)))
+        # Display the image with detected squares
+        #print(f"BOXLEN {len(boxes)}")
+        return boxes
+    boxes = box_seeker(image)
+    # Sorting our boxes 
+
+    def sort_largest(box):
+        return -(box[1][2] + box[1][3])
+    
+    if real:
+        boxes = sorted(boxes, key=sort_largest)
+        image = boxes[0][0]
+        boxes = box_seeker(image, whole=True)
+    
+
     def sort_boxes(box):
         if box[1][2] > box[1][3]: # Sat or Sun
             return 10000 + box[1][0] # skew sort by pushing them back
@@ -174,10 +196,16 @@ def box_recog(path, debug=False):
            return box[1][0]
 
     boxes = sorted(boxes, key=sort_boxes)
-    
+    boxes = boxes[:7]
     days = {'Monday': '', 'Tuesday': '', 'Wednesday': '', 'Thursday': '', 'Friday':'', 'Saturday':'', 'Sunday':''}
     text = [recognize_text(img[0]) for img in boxes]
      
+    if debug:
+        Image.fromarray(image).show()
+        #cv2.imshow('Detected Squares', image)
+        #cv2.waitKey(0)
+        #cv2.destroyAllWindows()
+    
     for i in range(len(text)):
         days[list(days.keys())[i]] = text[i]
     
@@ -221,8 +249,10 @@ def box_recog(path, debug=False):
 
         #second pass: check for time
         for line in temp:
-
+            print(day, temp)
             splat = line.split(' ')
+            if len(splat) == 1:
+                continue
             if line.split(' ')[0].isnumeric() and line.split(' ')[1] in ('AM','PM', 'am','pm','Am','aM','pM','Pm'):
                #incorrectly formatted 
                 splat[0] = splat[0] + splat[1].upper()
@@ -236,7 +266,6 @@ def box_recog(path, debug=False):
         for line in temp:
             # Split the string into the numerical part and the AM/PM part
             time, period = line.split(' ')[0][:-2], line.split(' ')[0][-2:]
-
             # Convert to 24-hour format
             if period == 'PM' and time != '12':
                 time = str(int(time) + 12)
@@ -244,6 +273,8 @@ def box_recog(path, debug=False):
                 time = '00'
             elif period == 'AM' and int(time) < 10:
                 time = '0' + time
+            if time not in times.keys():
+                continue
             times[time] += line + '\n'
         days[day] = times
         print(day)
@@ -252,10 +283,6 @@ def box_recog(path, debug=False):
         print(temp)
     
 
-    if debug:
-        cv2.imshow('Detected Squares', image)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
     return days
 
 if __name__ == "__main__":

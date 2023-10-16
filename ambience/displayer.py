@@ -24,6 +24,8 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from google.auth import exceptions
 from dateutil import parser
+from azure.identity import DefaultAzureCredential
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 
@@ -33,6 +35,31 @@ panel = None
 label = None
 
 pygame.mixer.init()
+
+def cloud_update():
+    try:
+        print("Azure Blob Storage Python quickstart sample")
+        account_url = "https://cs110032002ba3931bf.core.windows.net"
+        default_credential = DefaultAzureCredential()
+
+        # Create the BlobServiceClient object
+        blob_service_client = BlobServiceClient(account_url, credential=default_credential)
+
+        # Download the blob to a local file
+        local_path = ''
+        local_file_name = 'overlay'
+
+        download_file_path = os.path.join(local_path, str.replace(local_file_name, '.json', 'DOWNLOAD.txt'))
+        container_client = blob_service_client.get_container_client(container="deco3801-storage")
+        print("\nDownloading blob to \n\t" + download_file_path)
+
+        with open(file=download_file_path, mode="wb") as download_file:
+            download_file.write(container_client.download_blob(blob.name).readall())
+
+    except Exception as ex:
+        print('Exception:')
+        print(ex)
+
 
 
 def play_sound(type="base"):
@@ -287,6 +314,7 @@ def update_image():
     overlay = get_overlay_image()
     photo = ImageTk.PhotoImage(overlay).resize((640,455))
 
+
     label.config(image=photo)
     label.image = photo
 
@@ -341,6 +369,7 @@ def time_thread():
         time.sleep(30)
  
 if __name__ == "__main__":
+    cloud_update()
     weather.play_weather()
     init_display()
     t1 = threading.Thread(target=async_loop)

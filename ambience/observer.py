@@ -1,7 +1,7 @@
 # Observer Script
 import RPi.GPIO as GPIO #Need to install "Microsoft C++ Build Tools first"
 import subprocess
-from picamera2 import Picamera2 
+import cv2
 import time
 import recog
 from azure.iot.device import IoTHubDeviceClient, Message
@@ -14,6 +14,17 @@ def iothub_client_init():
     client = IoTHubDeviceClient.create_from_connection_string(CONNECTION_STRING)
     return client
 
+def capture_photo(cap):
+    #cap = cv2.VideoCapture(1)  # 1 for the USB camera, change as needed
+
+    ret, frame = cap.read()
+    if ret:
+        photo_name = "capture.jpg"
+        cv2.imwrite(photo_name, frame)
+        #print(f"Photo captured and saved as {photo_name}")
+
+    cap.release()
+
 LIDR_PIN = 6
 PHOTO_BUTTON_PIN = 7
 TRIGGER_READING = 1500
@@ -21,24 +32,34 @@ TRIGGER_READING = 1500
 GPIO.setup(LIDR_PIN, GPIO.IN)
 GPIO.setup(PHOTO_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-camera = Picamera2()
+# 1 should indicate the first usb camera, 0 being picam port
+camera = cv2.VideoCapture(0) 
+
+if not camera.isOpened():
+    print("Could not open camera.")
+    
+capture_photo(camera) #remove this
+json_object = recog.write_to_temp(recog.box_recog('capture.jpg'), infile="json/template.json", outfile="json/output.json") #delete this
+
 
 displayer_process = None
 button_pressed = False
 
 try:
     while True:
+        print("In LIDR loop.")
+        #Following three lines to be deleted for proper functionality.
+        print("Attempting to run displayer.")
+        displayer_process = subprocess.Popen(["python3", "displayer.py"])
+        break
         light_reading = GPIO.input(LIDR_PIN)
         if light_reading >= TRIGGER_READING and displayer_process is None:
+            print("Attempting to run displayer.")
             displayer_process = subprocess.Popen(["python3", "displayer_program.py"])
             break
-        break
         
-    camera.start_preview()
-    camera.start()
-    time.sleep(3)
-    camera.capture_file('capture.jpg')
     while True:
+        print("polling buttons")
         
         button_state = GPIO.input(PHOTO_BUTTON_PIN)
         '''
@@ -49,10 +70,10 @@ try:
             displayer_process = None
         '''
         if button_state == GPIO.LOW and not button_pressed:
-            # we need to kill the window before capture
-
-            camera.capture_file('capture.jpg')
-            json_object = recog.write_to_temp(recog.box_recog('capture.jpg'), infile="json/template.json", outfile="json/output.json") #has default file paths
+            print("Attempting Capture.")
+            capture_photo(camera)
+            #Sending to text recognition script
+            json_object = recog.write_to_temp(recog.box_recog('capture.jpg', real=True), infile="json/template.json", outfile="json/output.json") #has default file paths
             # push to cloud over here
             print("Successfully recognised text")
             
@@ -75,9 +96,10 @@ try:
             button_pressed = True
         elif button_state == GPIO.HIGH:
             button_pressed = False
+        break
 
 except KeyboardInterrupt:
     if displayer_process is not None:
         displayer_process.terminate()
-    camera.stop_preview()
     GPIO.cleanup()
+    cv2.destroyAllWindows()
