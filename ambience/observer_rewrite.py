@@ -10,8 +10,8 @@ import json
 
 
 # Button Setup
-LIDR_PIN = 6
-PHOTO_BUTTON_PIN = 11
+LIDR_PIN = 11
+PHOTO_BUTTON_PIN = 13
 TRIGGER_READING = 1500
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
@@ -27,7 +27,7 @@ blob_service_client = BlobServiceClient(account_url, credential=default_credenti
 
 # Camera Setup: 1 should indicate the first usb camera, 0 being picam port
 def capture_photo():
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
 
     if not cap.isOpened():
         print("Error: Could not open camera.")
@@ -43,9 +43,10 @@ def capture_photo():
 
 
 def button_callback(channel):
+    print("button pressed")
     capture_photo()
 
-    recog.write_to_temp(recog.box_recog('capture.jpg'), infile="json/template.json", outfile="json/output.json")
+    recog.write_to_temp("user2", recog.box_recog('capture.jpg', real=True, debug=True), infile="json/template.json", outfile="json/output.json")
     # push to cloud over here
     print("Successfully recognised text")
 
@@ -58,15 +59,17 @@ def button_callback(channel):
     with open(file=upload_file_path, mode="rb") as data:
         blob_client.upload_blob(data)
 
-try:
-    while True:
-        GPIO.add_event_detect(PHOTO_BUTTON_PIN, GPIO.RISING, callback=button_callback)
-        light_reading = GPIO.input(LIDR_PIN)
-        if light_reading >= TRIGGER_READING and displayer_process is None:
-            displayer_process = subprocess.Popen(["python3", "displayer_program.py"])
-            break
-except KeyboardInterrupt:
-    if displayer_process is not None:
-        displayer_process.terminate()
-    GPIO.cleanup()
-    cv2.destroyAllWindows()
+def button_callblack(channel):
+    print("hi")
+    
+    
+if __name__ == "__main__":
+    GPIO.add_event_detect(PHOTO_BUTTON_PIN, GPIO.RISING, callback=button_callback)
+    try:
+        while True:
+            pass
+    except KeyboardInterrupt:
+        if displayer_process is not None:
+            displayer_process.terminate()
+        GPIO.cleanup()
+        cv2.destroyAllWindows()

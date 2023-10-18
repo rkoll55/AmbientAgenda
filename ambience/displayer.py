@@ -14,6 +14,19 @@ import tkinter as tk
 import RPi.GPIO as GPIO
 
 
+light_sensor_pin = 17  
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(light_sensor_pin, GPIO.IN)
+
+
+LIDR_PIN = 11
+PHOTO_BUTTON_PIN = 15
+CLEAR_BUTTON = 15  
+TRIGGER_READING = 1500
+GPIO.setwarnings(False)
+GPIO.setup(CLEAR_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(LIDR_PIN, GPIO.IN)
+displayer_process = None
 
 # added for google calendar 
 import os.path
@@ -245,9 +258,7 @@ def async_loop():
     while True:
         time.sleep(5) 
 
-        #if the buttor is pressed
-        # clear_image()
-        #else
+        
         cloud_update()
         update_image()
 
@@ -313,6 +324,7 @@ def update_image():
     label.image = photo
 
 def clear_image():
+    print("hello")
     overlay = original_image.copy()
     photo = ImageTk.PhotoImage(overlay)
 
@@ -353,9 +365,6 @@ def time_thread():
         
         
 
-light_sensor_pin = 17  
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(light_sensor_pin, GPIO.IN)
 
 def init_display_light():
     global root, label, screen_brightness
@@ -390,12 +399,17 @@ def monitor_light_sensor():
     except KeyboardInterrupt:
         GPIO.cleanup()        
  
+
 if __name__ == "__main__":
+    
     start_time = time.time()
     cloud_update()
+
     read_json()
     weather.play_weather()
     init_display()
+    GPIO.add_event_detect(CLEAR_BUTTON, GPIO.RISING, callback=clear_image)
+
     t1 = threading.Thread(target=async_loop)
     t1.start()
     t2 = threading.Thread(target=time_thread)
