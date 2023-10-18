@@ -3,7 +3,7 @@ from PIL import Image, ImageTk, ImageDraw, ImageFont
 import time
 import json
 import textwrap
-import os
+import os, uuid
 from playsound import playsound
 import threading 
 import datetime
@@ -26,6 +26,8 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from google.auth import exceptions
 from dateutil import parser
+from azure.identity import DefaultAzureCredential
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 
@@ -36,9 +38,35 @@ label = None
 
 pygame.mixer.init()
 
+account_url = "https://cs110032002ba3931bf.blob.core.windows.net/"
+default_credential = DefaultAzureCredential()
+# Create the BlobServiceClient object
+blob_service_client = BlobServiceClient(account_url, credential=default_credential)
+
+# Download the blob to a local file
+local_path = 'json'
+local_file_name = 'overlay.json'
+
+download_file_path = os.path.join(local_path, local_file_name)
+container_client = blob_service_client.get_container_client(container="deco3801-storage")
+
+
+def cloud_update():
+    try:
+        print("Azure data update")
+        
+
+        with open(file=download_file_path, mode="wb") as download_file:
+            download_file.write(container_client.download_blob("overlay.json").readall())
+
+    except Exception as ex:
+        print('Exception:')
+        print(ex)
+
+
 
 def play_sound(type="base"):
-    print(type)
+   # print(type)
     #playsound("sounds/chime.mp3") 
 
     pygame.mixer.music.load("sounds/chime.mp3")
@@ -105,11 +133,11 @@ def get_overlay_image():
     sound_played = False
     image_with_text = original_image.copy()
     draw = ImageDraw.Draw(image_with_text)
-    font = ImageFont.load_default()
+    #font = ImageFont.load_default()
 
-   # font = ImageFont.truetype("/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf", 36, encoding="unic")
+    font = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeMonoBoldOblique.ttf", 36, encoding="unic")
     js = read_json()
-
+    #print(js)
     for day, day_info in js.items():
         if day == "Monday":
             offset = 150
@@ -200,17 +228,18 @@ def get_overlay_image():
 
     return image_with_text
 
-read_json()
 
 def init_display():
-    global root, label
+    global root, label, screen_brightness
     root = tk.Tk()
     image_with_text = get_overlay_image()
-    photo = ImageTk.PhotoImage(image_with_text)
-
+    photo = ImageTk.PhotoImage(image_with_text.resize((640,455)))
     label = tk.Label(root, image=photo)
     label.pack()
     label.photo = photo
+    screen_brightness = 1.0  # 100% brightness by default
+    root.attributes("-alpha", screen_brightness)
+    
     
 def async_loop():
     while True:
@@ -219,6 +248,7 @@ def async_loop():
         #if the buttor is pressed
         # clear_image()
         #else
+        cloud_update()
         update_image()
 
 def google_calendar_handler():
@@ -276,7 +306,8 @@ def google_calendar_handler():
 
 def update_image():
     overlay = get_overlay_image()
-    photo = ImageTk.PhotoImage(overlay)
+    photo = ImageTk.PhotoImage(overlay.resize((640,455)))
+
 
     label.config(image=photo)
     label.image = photo
@@ -326,7 +357,7 @@ light_sensor_pin = 17
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(light_sensor_pin, GPIO.IN)
 
-def init_display():
+def init_display_light():
     global root, label, screen_brightness
     root = tk.Tk()
     image_with_text = get_overlay_image()
@@ -345,11 +376,11 @@ def monitor_light_sensor():
             sensor_value = GPIO.input(light_sensor_pin)
 
             if sensor_value == GPIO.LOW:
-                print("Dark")
+              #  print("Dark")
                 if screen_brightness > 0.2:
                     screen_brightness -= 0.1  # Reduce brightness by 20% when it's dark
             else:
-                print("Light")
+           #     print("Light")
                 if screen_brightness < 1.0:
                     screen_brightness += 0.2  # Increase brightness by 20% when it's light
 
@@ -360,6 +391,9 @@ def monitor_light_sensor():
         GPIO.cleanup()        
  
 if __name__ == "__main__":
+    start_time = time.time()
+    cloud_update()
+    read_json()
     weather.play_weather()
     init_display()
     t1 = threading.Thread(target=async_loop)
