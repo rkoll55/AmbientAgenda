@@ -53,9 +53,8 @@ container_client = blob_service_client.get_container_client(container="deco3801-
 
 def cloud_update():
     try:
-        print("Azure data update")
+        #print("Azure data update")
         
-
         with open(file=download_file_path, mode="wb") as download_file:
             download_file.write(container_client.download_blob("overlay.json").readall())
 
@@ -241,6 +240,72 @@ def init_display():
     root.attributes("-alpha", screen_brightness)
     
     
+
+def google_calendar_handler():
+    try:
+        service = OAuthHandler()
+        now = datetime.datetime.utcnow().isoformat() + 'Z'
+        one_week_from_now = (datetime.datetime.utcnow() + timedelta(weeks=1)).isoformat() + 'Z'
+        
+        print('Getting all events for the upcoming week')
+        
+        events_result = service.events().list(calendarId='primary', timeMin=now, timeMax=one_week_from_now,
+                                              singleEvents=True, orderBy='startTime').execute()
+        
+        events = events_result.get('items', [])
+        
+        #remove later 
+        if events:
+            for event in events:
+                start = event['start'].get('dateTime'), event['start'].get('date')
+                print(f"{start}: {event['summary']}")
+                with open("json/test.json", "w") as json_file:
+                    json.dump(event, json_file)
+        
+        if not events:
+            return
+        
+        js = read_json()  # read the existing JSON data
+        existing_events = get_all_existing_events(js)
+
+        for event in events:
+            start = event['start'].get('dateTime', event['start'].get('date'))
+            date_obj = parser.parse(start)
+            day_of_week = date_obj.strftime("%A")
+
+            formatted_time = date_obj.strftime('%I%p').lower().lstrip('0')
+            event_summary = f"{formatted_time} {event['summary']}".lower()
+            hour_key = date_obj.strftime('%H')
+
+            user = 'user1'
+            if event_summary not in existing_events:
+                if day_of_week not in js:
+                    js[day_of_week] = {hour_key: {user: [event_summary]}}
+                else:
+                    if hour_key not in js[day_of_week]:
+                        js[day_of_week][hour_key] = {user: [event_summary]}
+                    elif user not in js[day_of_week][hour_key]:
+                        js[day_of_week][hour_key][user] = [event_summary]
+                    else:
+                        if event_summary not in js[day_of_week][hour_key][user]:
+                            js[day_of_week][hour_key][user].append(event_summary)
+                    existing_events.add(event_summary)
+
+        # Write data to JSON file
+        #PRINT 
+        print('point1')
+    
+        #/home/deco3801/Byte-Me/ambience/json/overlay.json
+        #"json/overlay.json"
+        
+        with open("json/overlay.json", "w") as json_file:
+            print("POINT")
+            json.dump(js, json_file)
+        print("point 2")
+    except HttpError as error:
+        print('An error occurred: %s' % error)
+
+
 def async_loop():
     while True:
         time.sleep(5) 
@@ -249,59 +314,13 @@ def async_loop():
         # clear_image()
         #else
         cloud_update()
+        print("cloud update")
+        time.sleep(1)
+        google_calendar_handler()
+        print("calendar update")
+        time.sleep(1)
         update_image()
-
-def google_calendar_handler():
-    while True: 
-        try:
-            service = OAuthHandler()
-            now = datetime.datetime.utcnow().isoformat() + 'Z'
-            one_week_from_now = (datetime.datetime.utcnow() + timedelta(weeks=1)).isoformat() + 'Z'
-            
-            #print('Getting all events for the upcoming week')
-            
-            events_result = service.events().list(calendarId='primary', timeMin=now, timeMax=one_week_from_now,
-                                                  singleEvents=True, orderBy='startTime').execute()
-            
-            events = events_result.get('items', [])
-            
-            if not events:
-                continue
-            
-            js = read_json()  # read the existing JSON data
-            existing_events = get_all_existing_events(js)
-
-            for event in events:
-                start = event['start'].get('dateTime', event['start'].get('date'))
-                date_obj = parser.parse(start)
-                day_of_week = date_obj.strftime("%A")
-    
-                formatted_time = date_obj.strftime('%I%p').lower().lstrip('0')
-                event_summary = f"{formatted_time} {event['summary']}".lower()
-                hour_key = date_obj.strftime('%H')
-
-                user = 'user1'
-                if event_summary not in existing_events:
-                    if day_of_week not in js:
-                        js[day_of_week] = {hour_key: {user: [event_summary]}}
-                    else:
-                        if hour_key not in js[day_of_week]:
-                            js[day_of_week][hour_key] = {user: [event_summary]}
-                        elif user not in js[day_of_week][hour_key]:
-                            js[day_of_week][hour_key][user] = [event_summary]
-                        else:
-                            if event_summary not in js[day_of_week][hour_key][user]:
-                                js[day_of_week][hour_key][user].append(event_summary)
-                        existing_events.add(event_summary)
-    
-            # Write data to JSON file
-            with open("json/overlay.json", "w") as json_file:
-                json.dump(js, json_file)
-            
-        except HttpError as error:
-            print('An error occurred: %s' % error)
-        
-        time.sleep(30)
+        print("image update")
 
 
 def update_image():
@@ -400,8 +419,8 @@ if __name__ == "__main__":
     t1.start()
     t2 = threading.Thread(target=time_thread)
     t2.start()
-    t3 = threading.Thread(target=google_calendar_handler)
-    t3.start()
+    #t3 = threading.Thread(target=google_calendar_handler)
+    #t3.start()
     t4 = threading.Thread(target=monitor_light_sensor)  
     t4.start()
     root.mainloop()

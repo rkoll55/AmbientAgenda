@@ -10,8 +10,8 @@ import json
 
 
 # Button Setup
-LIDR_PIN = 6
-PHOTO_BUTTON_PIN = 11
+LIDR_PIN = 13
+PHOTO_BUTTON_PIN = 15
 TRIGGER_READING = 1500
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
@@ -63,7 +63,7 @@ try:
         GPIO.add_event_detect(PHOTO_BUTTON_PIN, GPIO.RISING, callback=button_callback)
         light_reading = GPIO.input(LIDR_PIN)
         if light_reading >= TRIGGER_READING and displayer_process is None:
-            displayer_process = subprocess.Popen(["python3", "displayer_program.py"])
+            displayer_process = subprocess.Popen(["python3", "displayer.py"])
             break
 except KeyboardInterrupt:
     if displayer_process is not None:
