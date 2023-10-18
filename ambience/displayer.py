@@ -10,6 +10,8 @@ import datetime
 import re
 import pygame
 import weather
+import tkinter as tk
+import RPi.GPIO as GPIO
 
 
 
@@ -42,7 +44,7 @@ def play_sound(type="base"):
     pygame.mixer.music.load("sounds/chime.mp3")
     pygame.mixer.music.play()
 
-# for initial setup of access tokens for google calendar
+# For setting up google calendar credentials
 def OAuthHandler():
     creds = None
     if os.path.exists('json/token.json'):
@@ -53,7 +55,7 @@ def OAuthHandler():
             try:
                 creds.refresh(Request())
             except exceptions.RefreshError:
-                creds = None  # Set creds to None so that new authentication flow will be triggered
+                creds = None 
         if not creds:
             flow = InstalledAppFlow.from_client_secrets_file('json/credentials.json', SCOPES)
             creds = flow.run_local_server(port=0)
@@ -90,10 +92,8 @@ def make_sound(event):
         play_sound("base")
 
 
-# method to get all the existing events to check duplicate events 
 def get_all_existing_events(js):
     existing_events = set()
-    # may need js = read_json() here 
     for day, day_data in js.items():
         for user, events in day_data.items():
             for event in events:
@@ -105,9 +105,9 @@ def get_overlay_image():
     sound_played = False
     image_with_text = original_image.copy()
     draw = ImageDraw.Draw(image_with_text)
-    # font = ImageFont.truetype("/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf", 36, encoding="unic")
-    # font = ImageFont.load_default()
-    font = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeMonoBoldOblique.ttf", 36, encoding="unic")
+    font = ImageFont.load_default()
+
+   # font = ImageFont.truetype("/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf", 36, encoding="unic")
     js = read_json()
 
     for day, day_info in js.items():
@@ -116,7 +116,7 @@ def get_overlay_image():
             for info, day_data in day_info.items():
                 if isinstance(day_data, dict):
                     for user, events in day_data.items():
-                        colour = "blue" if user == "user1" else "green"
+                        colour = "#0070C1" if user == "user1" else "#008080"
                         for event in events:
                             wrapped_text = textwrap.fill(event, width=15)
                             draw.multiline_text((100, offset), wrapped_text, fill=colour, font=font)  
@@ -128,7 +128,7 @@ def get_overlay_image():
             for info, day_data in day_info.items():
                 if isinstance(day_data, dict):
                     for user, events in day_data.items():
-                        colour = "blue" if user == "user1" else "green"
+                        colour = "#0070C1" if user == "user1" else "#008080"
                         for event in events:
                             wrapped_text = textwrap.fill(event, width=15)
                             draw.multiline_text((450, offset), wrapped_text, fill=colour, font=font)  
@@ -140,7 +140,7 @@ def get_overlay_image():
             for info, day_data in day_info.items():
                 if isinstance(day_data, dict):
                     for user, events in day_data.items():
-                        colour = "blue" if user == "user1" else "green"
+                        colour = "#0070C1" if user == "user1" else "#008080"
                         for event in events:
                             wrapped_text = textwrap.fill(event, width=15)
                             draw.multiline_text((810, offset), wrapped_text, fill=colour, font=font)  
@@ -152,7 +152,7 @@ def get_overlay_image():
             for info, day_data in day_info.items():
                 if isinstance(day_data, dict):
                     for user, events in day_data.items():
-                        colour = "blue" if user == "user1" else "green"
+                        colour = "#0070C1" if user == "user1" else "#008080"
                         for event in events:
                             wrapped_text = textwrap.fill(event, width=15)
                             draw.multiline_text((1175, offset), wrapped_text, fill=colour, font=font)  
@@ -165,7 +165,7 @@ def get_overlay_image():
             for info, day_data in day_info.items():
                 if isinstance(day_data, dict):
                     for user, events in day_data.items():
-                        colour = "blue" if user == "user1" else "green"
+                        colour = "#0070C1" if user == "user1" else "#008080"
                         for event in events:
                             wrapped_text = textwrap.fill(event, width=15)
                             draw.multiline_text((1540, offset), wrapped_text, fill=colour, font=font)  
@@ -178,7 +178,7 @@ def get_overlay_image():
             for info, day_data in day_info.items():
                 if isinstance(day_data, dict):
                     for user, events in day_data.items():
-                        colour = "blue" if user == "user1" else "green"
+                        colour = "#0070C1" if user == "user1" else "#008080"
                         for event in events:
                             wrapped_text = textwrap.fill(event, width=40)
                             draw.multiline_text((90, offset), wrapped_text, fill=colour, font=font)  
@@ -191,7 +191,7 @@ def get_overlay_image():
             for info, day_data in day_info.items():
                 if isinstance(day_data, dict):
                     for user, events in day_data.items():
-                        colour = "blue" if user == "user1" else "green"
+                        colour = "#0070C1" if user == "user1" else "#008080"
                         for event in events:
                             wrapped_text = textwrap.fill(event, width=40)
                             draw.multiline_text((990, offset), wrapped_text, fill=colour, font=font)  
@@ -202,11 +202,10 @@ def get_overlay_image():
 
 read_json()
 
-#initialises Tkinter window once with the label to display the image, rather than recreating the window every time the image is updated.
 def init_display():
     global root, label
     root = tk.Tk()
-    image_with_text = get_overlay_image().resize((660,500))
+    image_with_text = get_overlay_image()
     photo = ImageTk.PhotoImage(image_with_text)
 
     label = tk.Label(root, image=photo)
@@ -215,7 +214,6 @@ def init_display():
     
 def async_loop():
     while True:
-        #print("Async loop is running!")
         time.sleep(5) 
 
         #if the buttor is pressed
@@ -223,12 +221,10 @@ def async_loop():
         #else
         update_image()
 
-# for google calendar
 def google_calendar_handler():
-    while True:  # keep this thread always running
+    while True: 
         try:
             service = OAuthHandler()
-            
             now = datetime.datetime.utcnow().isoformat() + 'Z'
             one_week_from_now = (datetime.datetime.utcnow() + timedelta(weeks=1)).isoformat() + 'Z'
             
@@ -240,24 +236,20 @@ def google_calendar_handler():
             events = events_result.get('items', [])
             
             if not events:
-                #print('No upcoming events found.')
-                continue  # go to next iteration of the loop
+                continue
             
             js = read_json()  # read the existing JSON data
             existing_events = get_all_existing_events(js)
 
             for event in events:
                 start = event['start'].get('dateTime', event['start'].get('date'))
-                # Parsing the date string to datetime object
                 date_obj = parser.parse(start)
-                # Get the day of the week
                 day_of_week = date_obj.strftime("%A")
     
-                formatted_time = date_obj.strftime('%I%p').lower().lstrip('0')  # e.g., "12pm" or "2am"
-                event_summary = f"{formatted_time} {event['summary']}"
-                hour_key = date_obj.strftime('%H')  # This gives the hour in the format "00" to "23"
+                formatted_time = date_obj.strftime('%I%p').lower().lstrip('0')
+                event_summary = f"{formatted_time} {event['summary']}".lower()
+                hour_key = date_obj.strftime('%H')
 
-                # Events for user 1
                 user = 'user1'
                 if event_summary not in existing_events:
                     if day_of_week not in js:
@@ -272,20 +264,19 @@ def google_calendar_handler():
                                 js[day_of_week][hour_key][user].append(event_summary)
                         existing_events.add(event_summary)
     
-            # Write updated data back to JSON file
+            # Write data to JSON file
             with open("json/overlay.json", "w") as json_file:
                 json.dump(js, json_file)
             
         except HttpError as error:
             print('An error occurred: %s' % error)
         
-        # sleep for 100 seconds before rechecking for events added to google calendar 
-        time.sleep(100)
+        time.sleep(30)
 
 
 def update_image():
     overlay = get_overlay_image()
-    photo = ImageTk.PhotoImage(overlay).resize((640,480))
+    photo = ImageTk.PhotoImage(overlay)
 
     label.config(image=photo)
     label.image = photo
@@ -308,8 +299,6 @@ def time_thread():
         day_of_week = current_datetime.strftime("%A")
         current_hour_24 = int(current_datetime.strftime("%H"))
         current_minute = current_datetime.minute
-        #print(current_datetime)
-
         
         json_file = read_json()
         #rread the JSON for the day and find the relevant events
@@ -317,15 +306,6 @@ def time_thread():
         # if numplayed > 0 and number events > numlpayed play the difference 
         times =  json_file.get(day_of_week, {})       
         counter = 0
-
-
-        # for ctime in times:
-        #     events = times[ctime]
-        #     if events:
-        #         for user in events:
-        #             cur_time = int(ctime)   
-                    
-        #             for event in events[user]:  
 
         for ctime, user_events in times.items():
             for user, events_list in user_events.items():
@@ -339,6 +319,45 @@ def time_thread():
         print(numplayed)
 
         time.sleep(30)
+        
+        
+
+light_sensor_pin = 17  
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(light_sensor_pin, GPIO.IN)
+
+def init_display():
+    global root, label, screen_brightness
+    root = tk.Tk()
+    image_with_text = get_overlay_image()
+    photo = ImageTk.PhotoImage(image_with_text)
+    label = tk.Label(root, image=photo)
+    label.pack()
+    label.photo = photo
+    screen_brightness = 1.0  # 100% brightness by default
+    root.attributes("-alpha", screen_brightness)
+
+
+def monitor_light_sensor():
+    global screen_brightness
+    try:
+        while True:
+            sensor_value = GPIO.input(light_sensor_pin)
+
+            if sensor_value == GPIO.LOW:
+                print("Dark")
+                if screen_brightness > 0.2:
+                    screen_brightness -= 0.1  # Reduce brightness by 20% when it's dark
+            else:
+                print("Light")
+                if screen_brightness < 1.0:
+                    screen_brightness += 0.2  # Increase brightness by 20% when it's light
+
+            root.attributes("-alpha", screen_brightness)
+            time.sleep(0.1)  
+
+    except KeyboardInterrupt:
+        GPIO.cleanup()        
  
 if __name__ == "__main__":
     weather.play_weather()
@@ -349,4 +368,6 @@ if __name__ == "__main__":
     t2.start()
     t3 = threading.Thread(target=google_calendar_handler)
     t3.start()
+    t4 = threading.Thread(target=monitor_light_sensor)  
+    t4.start()
     root.mainloop()

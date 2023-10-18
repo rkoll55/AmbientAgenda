@@ -14,8 +14,12 @@ def iothub_client_init():
     client = IoTHubDeviceClient.create_from_connection_string(CONNECTION_STRING)
     return client
 
-def capture_photo(cap):
-    #cap = cv2.VideoCapture(1)  # 1 for the USB camera, change as needed
+def capture_photo():
+    cap = cv2.VideoCapture(1)  # 1 for the USB camera, change as needed
+
+    if not cap.isOpened():
+        print("Error: Could not open the camera.")
+        return
 
     ret, frame = cap.read()
     if ret:
@@ -33,33 +37,22 @@ GPIO.setup(LIDR_PIN, GPIO.IN)
 GPIO.setup(PHOTO_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 # 1 should indicate the first usb camera, 0 being picam port
-camera = cv2.VideoCapture(0) 
+camera = cv2.VideoCapture(1) 
 
-if not camera.isOpened():
-    print("Could not open camera.")
-    
-capture_photo(camera) #remove this
-json_object = recog.write_to_temp(recog.box_recog('capture.jpg'), infile="json/template.json", outfile="json/output.json") #delete this
-
+if not cap.isOpened():
+    print("Error: Could not open camera.")
 
 displayer_process = None
 button_pressed = False
 
 try:
     while True:
-        print("In LIDR loop.")
-        #Following three lines to be deleted for proper functionality.
-        print("Attempting to run displayer.")
-        displayer_process = subprocess.Popen(["python3", "displayer.py"])
-        break
         light_reading = GPIO.input(LIDR_PIN)
         if light_reading >= TRIGGER_READING and displayer_process is None:
-            print("Attempting to run displayer.")
             displayer_process = subprocess.Popen(["python3", "displayer_program.py"])
             break
         
     while True:
-        print("polling buttons")
         
         button_state = GPIO.input(PHOTO_BUTTON_PIN)
         '''
@@ -70,13 +63,10 @@ try:
             displayer_process = None
         '''
         if button_state == GPIO.LOW and not button_pressed:
-            print("Attempting Capture.")
-            capture_photo(camera)
-            #Sending to text recognition script
-            json_object = recog.write_to_temp(recog.box_recog('capture.jpg'), infile="json/template.json", outfile="json/output.json") #has default file paths
+            capture_photo()
+            json_object = recog.write_to_temp(recog.box_recog('capture.jpg', real=True), infile="json/template.json", outfile="json/output.json") #has default file paths
             # push to cloud over here
             print("Successfully recognised text")
-            
             print("Connecting to IoT Hub...")
             client = iothub_client_init()
             client.connect()
@@ -96,7 +86,6 @@ try:
             button_pressed = True
         elif button_state == GPIO.HIGH:
             button_pressed = False
-        break
 
 except KeyboardInterrupt:
     if displayer_process is not None:
