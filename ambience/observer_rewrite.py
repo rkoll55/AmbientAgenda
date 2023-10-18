@@ -43,6 +43,9 @@ def capture_photo():
 
 
 def button_callback(channel):
+    print("button pressed")
+    
+    time.sleep(2)
     capture_photo()
 
     recog.write_to_temp(recog.box_recog('capture.jpg'), infile="json/template.json", outfile="json/output.json")
@@ -58,15 +61,9 @@ def button_callback(channel):
     with open(file=upload_file_path, mode="rb") as data:
         blob_client.upload_blob(data)
 
-try:
+if __name__ == "__main__":
+    GPIO.add_event_detect(PHOTO_BUTTON_PIN, GPIO.RISING, callback=button_callback)
+    print("hi")
+    #GPIO.cleanup
     while True:
-        GPIO.add_event_detect(PHOTO_BUTTON_PIN, GPIO.RISING, callback=button_callback)
-        light_reading = GPIO.input(LIDR_PIN)
-        if light_reading >= TRIGGER_READING and displayer_process is None:
-            displayer_process = subprocess.Popen(["python3", "displayer.py"])
-            break
-except KeyboardInterrupt:
-    if displayer_process is not None:
-        displayer_process.terminate()
-    GPIO.cleanup()
-    cv2.destroyAllWindows()
+        continue

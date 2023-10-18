@@ -50,6 +50,17 @@ local_file_name = 'overlay.json'
 download_file_path = os.path.join(local_path, local_file_name)
 container_client = blob_service_client.get_container_client(container="deco3801-storage")
 
+#Pi config
+PHOTO_BUTTON_PIN = 11
+CLEAR_BUTTON_PIN = 13
+LIDR_PIN = 15
+TRIGGER_READING = 1500
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(PHOTO_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(LIDR_PIN, GPIO.IN)
+displayer_process = None
+
 
 def cloud_update():
     try:
@@ -305,10 +316,13 @@ def google_calendar_handler():
     except HttpError as error:
         print('An error occurred: %s' % error)
 
+def wait_five(channel):
+    time.sleep(5)
 
 def async_loop():
     while True:
-        time.sleep(5) 
+        time.sleep(5)
+        
 
         #if the buttor is pressed
         # clear_image()
@@ -331,12 +345,13 @@ def update_image():
     label.config(image=photo)
     label.image = photo
 
-def clear_image():
+def clear_image(channel):
     overlay = original_image.copy()
-    photo = ImageTk.PhotoImage(overlay)
+    photo = ImageTk.PhotoImage(overlay.resize((640,455)))
 
     label.config(image=photo)
     label.image = photo
+    time.sleep(3)
 
 def time_thread():
     played = False
@@ -370,12 +385,7 @@ def time_thread():
 
         time.sleep(30)
         
-        
-
-light_sensor_pin = 17  
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(light_sensor_pin, GPIO.IN)
-
+    
 def init_display_light():
     global root, label, screen_brightness
     root = tk.Tk()
@@ -392,7 +402,7 @@ def monitor_light_sensor():
     global screen_brightness
     try:
         while True:
-            sensor_value = GPIO.input(light_sensor_pin)
+            sensor_value = GPIO.input(LIDR_PIN)
 
             if sensor_value == GPIO.LOW:
               #  print("Dark")
@@ -411,6 +421,7 @@ def monitor_light_sensor():
  
 if __name__ == "__main__":
     start_time = time.time()
+    GPIO.add_event_detect(PHOTO_BUTTON_PIN, GPIO.RISING, callback=clear_image)
     cloud_update()
     read_json()
     weather.play_weather()
@@ -419,8 +430,6 @@ if __name__ == "__main__":
     t1.start()
     t2 = threading.Thread(target=time_thread)
     t2.start()
-    #t3 = threading.Thread(target=google_calendar_handler)
-    #t3.start()
     t4 = threading.Thread(target=monitor_light_sensor)  
     t4.start()
     root.mainloop()
