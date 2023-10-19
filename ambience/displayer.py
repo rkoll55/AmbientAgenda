@@ -3,16 +3,15 @@ from PIL import Image, ImageTk, ImageDraw, ImageFont
 import time
 import json
 import textwrap
-import os
+import os, uuid
 from playsound import playsound
 import threading 
 import datetime
 import re
 import pygame
 import weather
-
-
-
+import tkinter as tk
+import RPi.GPIO as GPIO
 # added for google calendar 
 import os.path
 import datetime
@@ -24,21 +23,67 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from google.auth import exceptions
 from dateutil import parser
+from azure.identity import DefaultAzureCredential
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 
+'''
+Byte Me Displayer 
+This programme projects the users' calendar and plays the ambient sounds
+Calendar also
+'''
+
+
+# The code to set GPIO ports on board
+light_sensor_pin = 17  
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(light_sensor_pin, GPIO.IN)
+LIDR_PIN = 11
+PHOTO_BUTTON_PIN = 15
+CLEAR_BUTTON = 15  
+TRIGGER_READING = 1500
+GPIO.setwarnings(False)
+GPIO.setup(CLEAR_BUTTON, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(LIDR_PIN, GPIO.IN)
+displayer_process = None
+
+
+# Google calendar API link
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 
 
+# Defines the tikinter image and panels
 original_image = Image.open("images/template.png")
 panel = None
 label = None
-
 pygame.mixer.init()
 
+# Set up connection to Azure client
+account_url = "https://cs110032002ba3931bf.blob.core.windows.net/"
+default_credential = DefaultAzureCredential()
+# Create the BlobServiceClient object
+blob_service_client = BlobServiceClient(account_url, credential=default_credential)
 
+# Download the blob to a local file
+local_path = 'json'
+local_file_name = 'overlay.json'
+download_file_path = os.path.join(local_path, local_file_name)
+container_client = blob_service_client.get_container_client(container="deco3801-storage")
+
+
+# Attempt to pull with azure and overwrite the json file
+def cloud_update():
+    try:
+        print("Azure data update")
+        with open(file=download_file_path, mode="wb") as download_file:
+            download_file.write(container_client.download_blob("overlay.json").readall())
+
+    except Exception as ex:
+        print('Exception:')
+        print(ex)
+
+
+# Play a chime with pygame 
 def play_sound(type="base"):
-    print(type)
-    #playsound("sounds/chime.mp3") 
-
     pygame.mixer.music.load("sounds/chime.mp3")
     pygame.mixer.music.play()
 
@@ -47,7 +92,7 @@ def OAuthHandler():
     creds = None
     if os.path.exists('json/token.json'):
         creds = Credentials.from_authorized_user_file('json/token.json', SCOPES)
-
+    # Check the tokens are valid
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             try:
@@ -64,13 +109,13 @@ def OAuthHandler():
     service = build('calendar', 'v3', credentials=creds)
     return service
 
-
+# Read JSON file
 def read_json():
     with open("json/overlay.json", "r") as json_file:
         json_data = json.load(json_file)
     return json_data
 
-
+# Make a different sound based on the type of event
 def make_sound(event):
     event = event.lower()
     # sounds for food
@@ -89,7 +134,7 @@ def make_sound(event):
     else:
         play_sound("base")
 
-
+# Gets the events out of the JSON file
 def get_all_existing_events(js):
     existing_events = set()
     for day, day_data in js.items():
@@ -99,13 +144,16 @@ def get_all_existing_events(js):
 
     return existing_events
 
+# Getts the image and applies text overlay based in the overlay.json file
 def get_overlay_image():
     sound_played = False
     image_with_text = original_image.copy()
     draw = ImageDraw.Draw(image_with_text)
-    font = ImageFont.truetype("/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf", 36, encoding="unic")
+
+    font = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeMonoBoldOblique.ttf", 36, encoding="unic")
     js = read_json()
 
+    # Logic flow for each potential day
     for day, day_info in js.items():
         if day == "Monday":
             offset = 150
@@ -196,39 +244,43 @@ def get_overlay_image():
 
     return image_with_text
 
-read_json()
 
+# initialses the base display onto the screen
 def init_display():
-    global root, label
+    global root, label, screen_brightness
     root = tk.Tk()
     image_with_text = get_overlay_image()
-    photo = ImageTk.PhotoImage(image_with_text)
-
+    photo = ImageTk.PhotoImage(image_with_text.resize((640,455)))
     label = tk.Label(root, image=photo)
     label.pack()
     label.photo = photo
+    screen_brightness = 1.0  # 100% brightness by default
+    root.attributes("-alpha", screen_brightness)
     
+    
+# Daemon thread that polls the cloud for updates
 def async_loop():
     while True:
         time.sleep(5) 
 
-        #if the buttor is pressed
-        # clear_image()
-        #else
+        
+        cloud_update()
         update_image()
 
+
 def google_calendar_handler():
+    '''
+    Seperate thread that polls from google calendar every 30 seconds
+    '''
     while True: 
         try:
+            # Requests from cloud
             service = OAuthHandler()
             now = datetime.datetime.utcnow().isoformat() + 'Z'
-            one_week_from_now = (datetime.datetime.utcnow() + timedelta(weeks=1)).isoformat() + 'Z'
-            
-            #print('Getting all events for the upcoming week')
-            
+            one_week_from_now = (datetime.datetime.utcnow() + timedelta(weeks=1)).isoformat() + 'Z'            
             events_result = service.events().list(calendarId='primary', timeMin=now, timeMax=one_week_from_now,
                                                   singleEvents=True, orderBy='startTime').execute()
-            
+            # take the events from packet
             events = events_result.get('items', [])
             
             if not events:
@@ -237,6 +289,7 @@ def google_calendar_handler():
             js = read_json()  # read the existing JSON data
             existing_events = get_all_existing_events(js)
 
+            # Extract data from events
             for event in events:
                 start = event['start'].get('dateTime', event['start'].get('date'))
                 date_obj = parser.parse(start)
@@ -263,20 +316,21 @@ def google_calendar_handler():
             # Write data to JSON file
             with open("json/overlay.json", "w") as json_file:
                 json.dump(js, json_file)
-            
+        # Catch potential errors
         except HttpError as error:
             print('An error occurred: %s' % error)
         
         time.sleep(30)
 
-
+# Make tkinter reload the display 
 def update_image():
     overlay = get_overlay_image()
-    photo = ImageTk.PhotoImage(overlay)
+    photo = ImageTk.PhotoImage(overlay.resize((640,455)))
 
     label.config(image=photo)
     label.image = photo
 
+# Clear the tkinter display to make it ready to take photo
 def clear_image():
     overlay = original_image.copy()
     photo = ImageTk.PhotoImage(overlay)
@@ -284,12 +338,16 @@ def clear_image():
     label.config(image=photo)
     label.image = photo
 
+# Seperate thread to play sound if there is an event in the next hour
 def time_thread():
     played = False
     numplayed = 0
     counter = 0
+
+    # Regex to read the hour and am / pm
     pattern = r'([1-9]|1[0-2])(am|pm)'
 
+    # Compare with current hour to find if there is event in next hour
     while True:
         current_datetime = datetime.datetime.now()
         day_of_week = current_datetime.strftime("%A")
@@ -297,9 +355,7 @@ def time_thread():
         current_minute = current_datetime.minute
         
         json_file = read_json()
-        #rread the JSON for the day and find the relevant events
         # play the relevant sounds for them and track how many were played
-        # if numplayed > 0 and number events > numlpayed play the difference 
         times =  json_file.get(day_of_week, {})       
         counter = 0
 
@@ -313,16 +369,58 @@ def time_thread():
                         print(counter)
         numplayed = counter
         print(numplayed)
-
         time.sleep(30)
+        
+        
+# Code that initialises the lidar. 
+def init_display_light():
+    global root, label, screen_brightness
+    root = tk.Tk()
+    image_with_text = get_overlay_image()
+    photo = ImageTk.PhotoImage(image_with_text)
+    label = tk.Label(root, image=photo)
+    label.pack()
+    label.photo = photo
+    screen_brightness = 1.0  # 100% brightness by default
+    root.attributes("-alpha", screen_brightness)
+
+# Increase and decrease brighness of screen depening on light detected by lidar
+def monitor_light_sensor():
+    global screen_brightness
+    try:
+        while True:
+            sensor_value = GPIO.input(light_sensor_pin)
+
+            if sensor_value == GPIO.LOW:
+                if screen_brightness > 0.2:
+                    screen_brightness -= 0.1  # Reduce brightness by 20% when it's dark
+            else:
+                if screen_brightness < 1.0:
+                    screen_brightness += 0.2  # Increase brightness by 20% when it's light
+
+            root.attributes("-alpha", screen_brightness)
+            time.sleep(0.1)  
+
+    except KeyboardInterrupt:
+        GPIO.cleanup()        
  
+# Main function and tkinter loop
 if __name__ == "__main__":
+    
+    start_time = time.time()
+    cloud_update()
+
+    read_json()
     weather.play_weather()
     init_display()
+    GPIO.add_event_detect(CLEAR_BUTTON, GPIO.RISING, callback=clear_image)
+
     t1 = threading.Thread(target=async_loop)
     t1.start()
     t2 = threading.Thread(target=time_thread)
     t2.start()
     t3 = threading.Thread(target=google_calendar_handler)
     t3.start()
+    t4 = threading.Thread(target=monitor_light_sensor)  
+    t4.start()
     root.mainloop()

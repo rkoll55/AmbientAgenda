@@ -83,7 +83,7 @@ def upscale(path):
 
 # ----
 
-def recognize_text(image, debug=False):
+def recognize_text(image, debug=True):
     # Grayscale, Gaussian blur, Otsu's threshold - fun little preprocessing techniques ( ͡° ͜ʖ ͡°)
     if (type(image) == str):
         image = cv2.imread(image)

@@ -1,6 +1,6 @@
 import requests
 import pygame
-import time
+
 
 # OpenWeatherMap API key  /home/deco3801/Desktop/weather.py
 api_key = "273bc3d19d048c1238798c7e29ff54ef"
@@ -12,9 +12,9 @@ city_id = 2174003  # Brisbane, Australia
 weather_url = f"http://api.openweathermap.org/data/2.5/weather?id={city_id}&appid={api_key}"
 
 
-sunny_sound = "sunny.mp3"
-rainy_sound = "rainy.mp3"
-cloudy_sound = "sunny.mp3"
+sunny_sound = "sounds/sunny.mp3"
+rainy_sound = "sounds/rainy.mp3"
+cloudy_sound = "sounds/sunny.mp3"
 
 pygame.mixer.init()
 
@@ -45,6 +45,5 @@ def play_weather():
                 play_sound(rainy_sound)
             else:
                 play_sound(cloudy_sound)
-        
-        #time.sleep(10)
-        break
+            break        
+
