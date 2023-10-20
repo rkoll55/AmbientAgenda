@@ -41,7 +41,7 @@ def capture_photo():
 
     cap.release()
 
-
+# The function called upon the button press to capture, run recognition and upload recognised text.
 def button_callback(channel):
     print("button pressed")
     
@@ -64,6 +64,10 @@ def button_callback(channel):
 if __name__ == "__main__":
     print("Program Start")
     GPIO.add_event_detect(PHOTO_BUTTON_PIN, GPIO.RISING, callback=button_callback)
+    
+    # Start the display.
     displayer_process = subprocess.Popen(["python3", "displayer_program.py"])
+    
+    # Continue running in wait for button press.
     while True:
         continue
