@@ -41,6 +41,9 @@ Please refer to requirements.txt for a list of all the software dependencies we 
 ## Software We Reused
 For the associated website we reused code used from an INFS3202 project. Link to the repository has been provided above.
 
+## Sounds
+Sourced from [here](https://www.zapsplat.com/basic-member-home/).
+
 ### The DECO3801 project by  
 -*Rohan Kollambalath*  
 -*Aiden Richards*   
