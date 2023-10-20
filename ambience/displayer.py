@@ -78,13 +78,24 @@ def cloud_update():
 
 
 
-# Play a chime with pygame 
+# Play the corresponding type sound with pygame 
 def play_sound(type="base"):
    # print(type)
     #playsound("sounds/chime.mp3") 
-
-    pygame.mixer.music.load("sounds/chime.mp3")
+    if type == "base":
+        pygame.mixer.music.load("sounds/chime.mp3")
+    elif type == "food":
+        pygame.mixer.music.load("sounds/cooking.mp3")
+    elif type == "sport":
+        pygame.mixer.music.load("sounds/sports.mp3")
+    elif type == "work":
+        pygame.mixer.music.load("sounds/work.mp3")
+    elif type == "social":
+        pygame.mixer.music.load("sounds/social.mp3")
+    
     pygame.mixer.music.play()
+    while pygame.mixer.music.get_busy():
+        continue
 
 
 
