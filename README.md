@@ -32,7 +32,8 @@ Once all steps above have been complete run
 ./observer.py
 ```
 to launch the application.
-If any dependencies have been missed in the initial installation, run the extras as required by the `observer.py` file.
+
+If any dependencies have been missed in the initial installation, run these extra pip installs as required by the `observer.py` file.
 
 ## Website
 We have an associated website that allows users to login and register their Pis. The code repository for the website can be found [here](https://github.com/rkoll55/Ambiance)
