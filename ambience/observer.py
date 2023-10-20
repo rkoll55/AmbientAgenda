@@ -1,98 +1,69 @@
 # Observer Script
-import RPi.GPIO as GPIO #Need to install "Microsoft C++ Build Tools first"
+import RPi.GPIO as GPIO
 import subprocess
 import cv2
 import time
 import recog
-from azure.iot.device import IoTHubDeviceClient, Message
+from azure.identity import DefaultAzureCredential
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 import json
 
-CONNECTION_STRING = "HostName=deco3801.azure-devices.net;DeviceId=raspberrypi1;SharedAccessKey=jZKYxNL3AY5EuMBZF/p9YDUy54ClsFYStjhp/v8E4yg="
-GPIO.setmode(GPIO.BCM)
 
-def iothub_client_init():
-    client = IoTHubDeviceClient.create_from_connection_string(CONNECTION_STRING)
-    return client
+# Button Setup
+LIDR_PIN = 13
+PHOTO_BUTTON_PIN = 15
+TRIGGER_READING = 1500
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(PHOTO_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(LIDR_PIN, GPIO.IN)
+displayer_process = None
 
+# Cloud Storage Setup
+account_url = "https://cs110032002ba3931bf.blob.core.windows.net"
+default_credential = DefaultAzureCredential()
+blob_service_client = BlobServiceClient(account_url, credential=default_credential)
+
+
+# Camera Setup: 1 should indicate the first usb camera, 0 being picam port
 def capture_photo():
-    cap = cv2.VideoCapture(1)  # 1 for the USB camera, change as needed
+    cap = cv2.VideoCapture(1)
 
     if not cap.isOpened():
-        print("Error: Could not open the camera.")
+        print("Error: Could not open camera.")
         return
 
     ret, frame = cap.read()
     if ret:
         photo_name = "capture.jpg"
         cv2.imwrite(photo_name, frame)
-        #print(f"Photo captured and saved as {photo_name}")
+        # print(f"Photo captured and saved as {photo_name}")
 
     cap.release()
 
-LIDR_PIN = 6
-PHOTO_BUTTON_PIN = 7
-TRIGGER_READING = 1500
 
-GPIO.setup(LIDR_PIN, GPIO.IN)
-GPIO.setup(PHOTO_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+def button_callback(channel):
+    print("button pressed")
+    
+    time.sleep(2)
+    capture_photo()
 
-# 1 should indicate the first usb camera, 0 being picam port
-camera = cv2.VideoCapture(1) 
+    recog.write_to_temp(recog.box_recog('capture.jpg'), infile="json/template.json", outfile="json/output.json")
+    # push to cloud over here
+    print("Successfully recognised text")
 
-if not cap.isOpened():
-    print("Error: Could not open camera.")
+    # Send to container
+    local_file_name = "json/template.json"
+    upload_file_path = local_file_name
 
-displayer_process = None
-button_pressed = False
+    blob_client = blob_service_client.get_blob_client(container="deco3801-storage", blob=local_file_name)
+    print("\nUploading to Azure Storage as blob:\n\t" + local_file_name)
+    with open(file=upload_file_path, mode="rb") as data:
+        blob_client.upload_blob(data)
 
-try:
+if __name__ == "__main__":
+    print("Program Start")
+    GPIO.add_event_detect(PHOTO_BUTTON_PIN, GPIO.RISING, callback=button_callback)
+    displayer_process = subprocess.Popen(["python3", "displayer_program.py"])
     while True:
-        light_reading = GPIO.input(LIDR_PIN)
-        if light_reading >= TRIGGER_READING and displayer_process is None:
-            displayer_process = subprocess.Popen(["python3", "displayer_program.py"])
-            break
-        
-    while True:
-        
-        button_state = GPIO.input(PHOTO_BUTTON_PIN)
-        '''
-        if light_reading >= TRIGGER_READING and displayer_process is None:
-            displayer_process = subprocess.Popen(["python3", "displayer_program.py"])
-        elif light_reading < TRIGGER_READING and displayer_process is not None:
-            displayer_process.terminate()
-            displayer_process = None
-        '''
-        if button_state == GPIO.LOW and not button_pressed:
-
-            print("Attempting Capture.")
-            capture_photo(camera)
-            #Sending to text recognition script
-            
-            json_object = recog.write_to_temp(recog.box_recog('capture.jpg', real=True), infile="json/template.json", outfile="json/output.json") #has default file paths
-            # push to cloud over here
-            print("Successfully recognised text")
-            print("Connecting to IoT Hub...")
-            client = iothub_client_init()
-            client.connect()
-            print("Successfully connected to IoT hub")
-
-            #the code to send
-            print(json_object)
-            print(str(json_object))
-            message = Message(str(json_object))
-            print("Sending capture to IoT Hub...")
-            message.content_encoding = "utf-8"
-            message.content_type = "application/json"
-            client.send_message(message)
-            print("Sent.")
-            #no idea if it works
-
-            button_pressed = True
-        elif button_state == GPIO.HIGH:
-            button_pressed = False
-
-except KeyboardInterrupt:
-    if displayer_process is not None:
-        displayer_process.terminate()
-    GPIO.cleanup()
-    cv2.destroyAllWindows()
+        continue
