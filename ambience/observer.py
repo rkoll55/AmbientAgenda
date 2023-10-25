@@ -10,8 +10,8 @@ import json
 
 
 # Button Setup
-LIDR_PIN = 13
-PHOTO_BUTTON_PIN = 15
+LIDR_PIN = 15
+PHOTO_BUTTON_PIN = 11
 TRIGGER_READING = 1500
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
@@ -27,7 +27,7 @@ blob_service_client = BlobServiceClient(account_url, credential=default_credenti
 
 # Camera Setup: 1 should indicate the first usb camera, 0 being picam port
 def capture_photo():
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
 
     if not cap.isOpened():
         print("Error: Could not open camera.")
@@ -47,10 +47,12 @@ def button_callback(channel):
     
     time.sleep(2)
     capture_photo()
-
-    recog.write_to_temp(recog.box_recog('capture.jpg'), infile="json/template.json", outfile="json/output.json")
-    # push to cloud over here
-    print("Successfully recognised text")
+    try:
+        recog.write_to_temp(recog.box_recog('capture.jpg'), infile="json/template2.json", outfile="json/output.json")
+        # push to cloud over here
+        print("Successfully recognised text")
+    except Exception as e:
+        print("Failed to read text")
 
     # Send to container
     local_file_name = "json/template.json"

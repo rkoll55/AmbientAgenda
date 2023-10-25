@@ -29,6 +29,7 @@ from dateutil import parser
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 
+obj = threading.Semaphore(1)
 
 # Google calendar API link
 SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
@@ -329,13 +330,23 @@ def async_loop():
         #if the buttor is pressed
         # clear_image()
         #else
+        obj.acquire()
         cloud_update()
+        obj.release()
         print("cloud update")
         time.sleep(1)
+        
+        obj.acquire()
         google_calendar_handler()
+        obj.release()
+
         print("calendar update")
         time.sleep(1)
+        
+        obj.acquire()
         update_image()
+        obj.release()
+
         print("image update")
 
 
@@ -351,12 +362,14 @@ def update_image():
 
 # Clear the tkinter display to make it ready to take photo
 def clear_image(channel):
+    obj.acquire()
     overlay = original_image.copy()
     photo = ImageTk.PhotoImage(overlay.resize((640,455)))
 
     label.config(image=photo)
     label.image = photo
     time.sleep(3)
+    obj.release()
 
 
 # Seperate thread to play sound if there is an event in the next hour
@@ -367,6 +380,7 @@ def time_thread():
     pattern = r'([1-9]|1[0-2])(am|pm)'
 
     while True:
+        obj.acquire()
         current_datetime = datetime.datetime.now()
         day_of_week = current_datetime.strftime("%A")
         current_hour_24 = int(current_datetime.strftime("%H"))
@@ -388,8 +402,9 @@ def time_thread():
                         counter = counter + 1
                         print(counter)
         numplayed = counter
+        obj.release()
         print(numplayed)
-
+        
         time.sleep(30)
        
         
