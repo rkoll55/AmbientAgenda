@@ -66,7 +66,7 @@ if __name__ == "__main__":
     GPIO.add_event_detect(PHOTO_BUTTON_PIN, GPIO.RISING, callback=button_callback)
     
     # Start the display.
-    displayer_process = subprocess.Popen(["python3", "displayer_program.py"])
+    displayer_process = subprocess.Popen(["python3", "displayer.py"])
     
     # Continue running in wait for button press.
     while True:

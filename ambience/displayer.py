@@ -84,6 +84,8 @@ def play_sound(type="base"):
     #playsound("sounds/chime.mp3") 
     if type == "base":
         pygame.mixer.music.load("sounds/chime.mp3")
+    elif type == "weather":
+        pygame.mixer.music.load("sounds/sunny.mp3")
     elif type == "food":
         pygame.mixer.music.load("sounds/cooking.mp3")
     elif type == "sport":
@@ -418,8 +420,11 @@ def monitor_light_sensor():
             else:
            #     print("Light")
                 if screen_brightness < 1.0:
-                    screen_brightness += 0.2  # Increase brightness by 20% when it's light
-
+                # Increase brightness by 20% when it's light
+                    screen_brightness += 0.1
+                    if screen_brightness >= 1:
+                        weather.play_weather()
+                    
             root.attributes("-alpha", screen_brightness)
             time.sleep(0.1)  
 
@@ -433,7 +438,6 @@ if __name__ == "__main__":
     GPIO.add_event_detect(PHOTO_BUTTON_PIN, GPIO.RISING, callback=clear_image)
     cloud_update()
     read_json()
-    weather.play_weather()
     init_display()
     t1 = threading.Thread(target=async_loop)
     t1.start()
